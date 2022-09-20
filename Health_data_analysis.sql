@@ -58,10 +58,20 @@ CREATE TABLE health_data(
 
 COPY health_data
 FROM 'C:\Users\aduol\Downloads\SQL DATA SET\Data\Health_data.csv'
-WITH (FORMAT CSV, HEADER, DELIMITER '|')
-;
+WITH (FORMAT CSV, HEADER, DELIMITER '|');
 
 --Previewing data--
+SELECT
+*
+FROM health_data;
 
-SELECT *
-FROM health_data
+/*converting data types of select variables with true/false values
+into integer type
+*/
+
+ALTER TABLE health_data ALTER COLUMN hypertensive TYPE INTEGER;
+ALTER TABLE health_data ALTER COLUMN chd_with_no_mi TYPE INTEGER;
+ALTER TABLE health_data ALTER COLUMN atrialfibrillation TYPE INTEGER;
+ALTER TABLE health_data ALTER COLUMN depression TYPE INTEGER;
+ALTER TABLE health_data ALTER COLUMN copd TYPE INTEGER;
+
