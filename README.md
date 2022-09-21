@@ -1,8 +1,9 @@
-# Health-data Analysis
-Retrospective exploratory data analysis of intensive care unit health-data downloaded from kaggle.com already processed by user @saurabhshahane.
+# Retrospective Health-data Analysis
+Retrospective exploratory data analysis of intensive care unit health-data downloaded from kaggle.com already preprocessed by user @saurabhshahane.
 
 **NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1). Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly PostgreSQL, Excel and Tableau
 ### Description of the Data
+The MIMIC-III database is publicly a available critical care database containing de-identified data on 46520 patients and 58976 admissions to the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between 2001 and 2008
 #### Quick Overview
 A data of more than 50 variables and 1176 observations
 
@@ -58,3 +59,18 @@ A data of more than 50 variables and 1176 observations
 * Lactic_acid
 * PCO2: Partial Pressure of Carbon Dioxide, this measures the carbon dioxide within the arterial or venous blood.
 * EF: Ejection Fraction: Used to gauge how healthy the heart is. It is the amount of blood that the heart pumps each time it beats.
+
+## Questions
+Based on the data available the following questions will be answered
+- Which age group is most in the hospital?
+- which age group of patients dies more in the hospital?
+- which genders is the most prevalent in the hospital?
+- how many patients died in the hospital with atrial fibrillation?
+- how many patients in the hospital have depression?
+- Is there a correlation between depression and aging?
+- what is the rate of non-survived patients with hypertension?
+- How many patients with renal failure are alive in the hospital?
+- how many patients in the hospital with Hperlipemia are dead?
+- how many patients in the hospital with Anemia are dead?
+- What is the proportion of survival and non-survival between diabetic and non-diabetic patients
+- What is the proportion of survival and non-survival between depressed and non-depressed patients
