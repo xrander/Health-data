@@ -74,4 +74,43 @@ ALTER TABLE health_data ALTER COLUMN chd_with_no_mi TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN atrialfibrillation TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN depression TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN copd TYPE INTEGER;
+ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 
+--SOlUTION TO QUESTIONS
+--Which age group is the  most in the hospital
+
+SELECT
+DISTINCT(age),
+count(*)
+FROM health_data
+GROUP BY DISTINCT(age)
+ORDER BY count(*) DESC;
+
+--which age group of patients dies more in the hospital?
+-- where 0 = alive and 1 = dead
+SELECT
+DISTINCT(age),
+outcome,
+count(*)
+FROM health_data
+GROUP BY DISTINCT(age),outcome
+ORDER BY age;
+
+--- which genders is the most prevalent in the hospital?
+--WHERE 1 = Male and 2 = Female
+SELECT
+gender,
+count(*)
+FROM health_data
+GROUP BY gender
+ORDER BY count(*);
+
+--which gender group is having the highest number of death?
+SELECT
+gender,
+outcome,
+count(*)
+FROM health_data
+WHERE outcome = 1 OR outcome = 0
+GROUP BY gender, outcome
+ORDER BY count(*);

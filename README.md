@@ -1,7 +1,7 @@
 # Retrospective Health-data Analysis
 Retrospective exploratory data analysis of intensive care unit health-data downloaded from kaggle.com already preprocessed by user @saurabhshahane.
 
-**NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1). Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly PostgreSQL, Excel and Tableau
+**NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1). Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly PostgreSQL and R.
 ### Description of the Data
 The MIMIC-III database is publicly a available critical care database containing de-identified data on 46520 patients and 58976 admissions to the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between 2001 and 2008
 #### Quick Overview
@@ -9,7 +9,7 @@ A data of more than 50 variables and 1176 observations
 
 #### Data Definition
 * group_num
-* ID = The patient ID
+* ID: The patient ID
 * outcome: 0 = Alive and 1 = Dead
 * age: the age of the patient
 * gender: 1 = Male and 2 = Female
@@ -62,9 +62,10 @@ A data of more than 50 variables and 1176 observations
 
 ## Questions
 Based on the data available the following questions will be answered
-- Which age group is most in the hospital?
+- Which age group is the most in the hospital?
 - which age group of patients dies more in the hospital?
-- which genders is the most prevalent in the hospital?
+- which gender is the most prevalent in the hospital?
+- which gender group is having the highest number of death?
 - how many patients died in the hospital with atrial fibrillation?
 - how many patients in the hospital have depression?
 - Is there a correlation between depression and aging?
