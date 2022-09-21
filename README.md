@@ -4,7 +4,7 @@ Retrospective exploratory data analysis of intensive care unit health-data downl
 **NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1). Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly PostgreSQL, Excel and Tableau
 ### Description of the Data
 #### Quick Overview
-A data of 1176 Variables 
+A data of more than 50 variables and 1176 observations
 
 #### Data Definition
 * group_num
