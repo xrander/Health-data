@@ -5,51 +5,53 @@ Retrospective exploratory data analysis of intensive care unit health-data downl
 ### Description of the Data
 #### Quick Overview
 A data of 1176 Variables 
-group_num = ,
-ID = The patient ID,
-outcome: 0 = Alive and 1 = Dead,
-age: the age of the patient,
-gender: 1 = Male and 2 = Female,
-BMI: Body Mass Index,
-hypertensive: 0 = with and 1 = without,
-atrialfibrillation: 0 = with and 1 = without ,
-CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without,
-diabetes: 0 = wo,
-deficiencyanemias: 0 = with and 1 = without,
-depression: 0 = with and 1 = without,
-Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without,
-Renal_failure: 0 = without renal failure and 1 = with renal failure,
-COPD: chronic obstructive pulmonary disease(A disease causing airflow blockage and breathing related problems). 0 = without and 1 = with,
-heart_rate,Systolic_blood_pressure,
-Diastolic_blood_pressure = ,
-Respiratory_rate,
-temperature,
-SP_O2,
-Urine_output,
-hematocrit,
-RBC,
-MCH,
-MCHC,
-MCV,
-RDW,
-Leucocyte,
-Platelets,
-Neutrophils,
-Basophils,
-Lymphocyte,
-PT,
-INR,
-NT_proBNP,Creatine_kinase,
-Creatinine,
-Urea_nitrogen,
-glucose,
-Blood_potassium,Blood_sodium,
-Blood_calcium,
-Chloride,
-Anion_gap,
-Magnesium_ion,
-PH,
-Bicarbonate,
-Lactic_acid,
-PCO2,
-EF
+
+#### Data Definition
+* group_num
+* ID = The patient ID
+* outcome: 0 = Alive and 1 = Dead
+* age: the age of the patient
+* gender: 1 = Male and 2 = Female
+* BMI: Body Mass Index
+* hypertensive: 0 = with and 1 = without
+* atrialfibrillation: 0 = with and 1 = without
+* CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without
+* diabetes: 0 = with and 1 without
+* deficiencyanemias: 0 = with and 1 = without
+* depression: 0 = with and 1 = without
+* Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without
+* Renal_failure: 0 = without renal failure and 1 = with renal failure
+* COPD: chronic obstructive pulmonary disease(A disease causing airflow blockage and breathing related problems). 0 = without and 1 = with
+* heart_rate,Systolic_blood_pressure
+* Diastolic_blood_pressure =
+* Respiratory_rate
+* temperature
+* SP_O2
+* Urine_output
+* hematocrit
+* RBC
+* MCH
+* MCHC
+* MCV
+* RDW
+* Leucocyte
+* Platelets
+* Neutrophils
+* Basophils
+* Lymphocyte
+* PT
+* INR
+* NT_proBNP,Creatine_kinase
+* Creatinine
+* Urea_nitrogen
+* glucose
+* Blood_potassium,Blood_sodium
+* Blood_calcium
+* Chloride
+* Anion_gap
+* Magnesium_ion
+* PH
+* Bicarbonate
+* Lactic_acid
+* PCO2
+* EF
