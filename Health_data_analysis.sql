@@ -65,7 +65,28 @@ SELECT
 *
 FROM health_data;
 
-/*converting data types of select variables with true/false values
+--a data from outcome is having null and we'll remove that row
+-- Finding data with null value
+SELECT
+id,
+age,
+outcome,
+COUNT(*)
+FROM health_data
+WHERE outcome IS NULL
+GROUP BY id, age, outcome;
+
+/*the NULL data is attached to the age 83, since a person can either be dead or alive,
+this row will be deleted.
+The id '162338' has been identified as neither dead or alive and will be deleted from the table
+*/
+
+DELETE FROM health_data
+WHERE id = 162338;
+
+-- running the query to find the null value again should return empty spaces now.
+
+/*next we'll be converting data types of select variables with true/false values
 into integer type
 */
 
@@ -78,7 +99,6 @@ ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 
 --SOlUTION TO QUESTIONS
 --Which age group is the  most in the hospital
-
 SELECT
 DISTINCT(age),
 count(*)
@@ -111,6 +131,15 @@ gender,
 outcome,
 count(*)
 FROM health_data
-WHERE outcome = 1 OR outcome = 0
 GROUP BY gender, outcome
+ORDER BY count(*);
+
+--how many patients died in the hospital with atrial fibrillation
+SELECT
+atrialfibrillation,
+outcome,
+count(*)
+FROM health_data
+WHERE outcome IS NOT NULL
+GROUP BY atrialfibrillation, outcome
 ORDER BY count(*);
