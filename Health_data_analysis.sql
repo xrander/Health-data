@@ -100,10 +100,10 @@ ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 --Which age group is the  most in the hospital
 SELECT
 DISTINCT(age),
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY DISTINCT(age)
-ORDER BY count(*) DESC;
+ORDER BY count DESC;
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
@@ -119,26 +119,31 @@ ORDER BY age;
 --WHERE 1 = Male and 2 = Female
 SELECT
 gender,
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY gender
-ORDER BY count(*);
+ORDER BY count;
 
 --which gender group is having the highest number of death?
 SELECT
 gender,
 outcome,
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY gender, outcome
-ORDER BY count(*);
+ORDER BY count;
 
 --how many patients died in the hospital with atrial fibrillation
 SELECT
 atrialfibrillation,
 outcome,
-count(*)
+count(*) AS count
 FROM health_data
 WHERE outcome IS NOT NULL
 GROUP BY atrialfibrillation, outcome
 ORDER BY count(*);
+
+-- Is there a correlation between depression and aging?
+SELECT corr(depression, age)
+      AS depression_age_ r -- r denotes the Pearson correlation coefficient
+FROM health_data;
