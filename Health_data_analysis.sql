@@ -147,3 +147,14 @@ ORDER BY count(*);
 SELECT corr(depression, age)
       AS depression_age_ r -- r denotes the Pearson correlation coefficient
 FROM health_data;
+
+-- Rate of gender with hypertension
+SELECT
+  (SELECT count(hypertensive):: FLOAT FROM health_data WHERE hypertensive = 0 AND gender = 1) /
+    (SELECT count(hypertensive) FROM health_data)) * 100 AS hypertensive_male,
+
+  ((SELECT count(hypertensive):: FLOAT FROM health_data WHERE hypertensive = 0 AND gender = 2) /
+    (SELECT count(hypertensive) FROM health_data)) * 100 AS hypertensive_female
+
+FROM health_data
+GROUP BY hypertensive_male, hypertensive_female
