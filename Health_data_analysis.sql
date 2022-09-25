@@ -151,11 +151,11 @@ FROM health_data;
 -- Rate of gender with hypertension
 SELECT
   round(
-    ((SELECT count(hypertensive):: FLOAT FROM health_data WHERE hypertensive = 0 AND gender = 1) /
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 1) /
     (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_male,
 
   round(
-    ((SELECT count(hypertensive):: FLOAT FROM health_data WHERE hypertensive = 0 AND gender = 2) /
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 2) /
     (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_female
 
 FROM health_data
