@@ -1,5 +1,5 @@
 -- Active: 1663635897256@@127.0.0.1@5432@project
-CREATE TABLE health_data( 
+CREATE TABLE health_data(
     group_num SMALLINT,
     ID BIGINT PRIMARY KEY,
     outcome SMALLINT,
