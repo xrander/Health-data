@@ -159,4 +159,15 @@ SELECT
     (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_female
 
 FROM health_data
-GROUP BY hypertensive_male, hypertensive_female
+GROUP BY hypertensive_male, hypertensive_female;
+
+-- what is the rate of non-survived patients with hypertension?
+SELECT hypertensive,
+       outcome,
+       round(
+        ((SELECT count(outcome):: decimal FROM health_data WHERE hypertensive = 0 AND outcome = 1) /
+        (SELECT count(outcome) FROM health_data WHERE hypertensive = 0))
+        * 100, 2) AS per_dead_hypertensive_patient
+FROM health_data
+WHERE outcome IS NOT NULL AND outcome = 1 AND hypertensive = 0
+GROUP BY 1,2,3;
