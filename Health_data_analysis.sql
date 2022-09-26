@@ -161,6 +161,7 @@ SELECT
 FROM health_data
 GROUP BY hypertensive_male, hypertensive_female;
 
+
 -- what is the rate of non-survived patients with hypertension?
 SELECT hypertensive,
        outcome,
@@ -171,3 +172,14 @@ SELECT hypertensive,
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND hypertensive = 0
 GROUP BY 1,2,3;
+
+
+-- How many patients with renal failure are alive in the hospital?
+SELECT renal_failure,
+       outcome,
+       count(*) AS patient_with_renal_failure_alive
+FROM health_data
+WHERE outcome IS NOT NULL
+      AND outcome = 0 AND Renal_failure = 1
+GROUP BY 1, 2
+ORDER BY 3
