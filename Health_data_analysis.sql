@@ -182,7 +182,7 @@ FROM health_data
 WHERE outcome IS NOT NULL
        AND outcome = 0 AND Renal_failure = 1
 GROUP BY 1, 2
-ORDER BY 3
+
 
 
 -- how many patients in the hospital with Hperlipemia are dead?
@@ -193,4 +193,13 @@ FROM health_data
 WHERE outcome IS NOT NULL
       AND outcome = 1 AND hyperlipemia = 0
 GROUP BY 1, 2
-ORDER BY 3
+
+
+-- - how many patients in the hospital with Anemia are dead?
+SELECT outcome,
+       deficiencyanemias,
+       count(*) AS dead_patient_with_deficiencyanemias
+FROM health_data
+WHERE outcome IS NOT NULL
+       AND outcome = 1 AND deficiencyanemias = 0
+GROUP BY 1, 2
