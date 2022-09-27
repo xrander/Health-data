@@ -1,5 +1,5 @@
 -- Active: 1663635897256@@127.0.0.1@5432@project
-CREATE TABLE health_data( 
+CREATE TABLE health_data(
     group_num SMALLINT,
     ID BIGINT PRIMARY KEY,
     outcome SMALLINT,
@@ -100,10 +100,10 @@ ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 --Which age group is the  most in the hospital
 SELECT
 DISTINCT(age),
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY DISTINCT(age)
-ORDER BY count(*) DESC;
+ORDER BY count DESC;
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
@@ -119,26 +119,83 @@ ORDER BY age;
 --WHERE 1 = Male and 2 = Female
 SELECT
 gender,
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY gender
-ORDER BY count(*);
+ORDER BY count;
 
 --which gender group is having the highest number of death?
 SELECT
 gender,
 outcome,
-count(*)
+count(*) AS count
 FROM health_data
 GROUP BY gender, outcome
-ORDER BY count(*);
+ORDER BY count;
 
 --how many patients died in the hospital with atrial fibrillation
 SELECT
 atrialfibrillation,
 outcome,
-count(*)
+count(*) AS count
 FROM health_data
 WHERE outcome IS NOT NULL
 GROUP BY atrialfibrillation, outcome
 ORDER BY count(*);
+
+-- Is there a correlation between depression and aging?
+SELECT corr(depression, age)
+      AS depression_age_ r -- r denotes the Pearson correlation coefficient
+FROM health_data;
+
+-- Rate of gender with hypertension
+SELECT
+  round(
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 1) /
+    (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_male,
+
+  round(
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 2) /
+    (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_female
+
+FROM health_data
+GROUP BY hypertensive_male, hypertensive_female;
+
+
+-- what is the rate of non-survived patients with hypertension?
+SELECT hypertensive,
+       outcome,
+       round(
+        ((SELECT count(outcome):: decimal FROM health_data WHERE hypertensive = 0 AND outcome = 1) /
+        (SELECT count(outcome) FROM health_data WHERE hypertensive = 0))
+        * 100, 2) AS per_dead_hypertensive_patient
+FROM health_data
+WHERE outcome IS NOT NULL AND outcome = 1 AND hypertensive = 0
+GROUP BY 1,2,3;
+
+
+-- How many patients with renal failure are alive in the hospital?
+SELECT renal_failure,
+       outcome,
+       count(*) AS patient_with_renal_failure_alive
+FROM health_data
+WHERE outcome IS NOT NULL AND outcome = 0 AND Renal_failure = 1
+GROUP BY 1, 2
+
+
+-- how many patients in the hospital with Hperlipemia are dead?
+SELECT outcome,
+       hyperlipemia,
+       count(*) AS dead_patient_with_Hperlipemia
+FROM health_data
+WHERE outcome IS NOT NULL AND outcome = 1 AND hyperlipemia = 0
+GROUP BY 1, 2
+
+
+-- - how many patients in the hospital with Anemia are dead?
+SELECT outcome,
+       deficiencyanemias,
+       count(*) AS dead_patient_with_deficiencyanemias
+FROM health_data
+WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
+GROUP BY 1, 2
