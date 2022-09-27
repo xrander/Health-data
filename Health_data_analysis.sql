@@ -99,11 +99,13 @@ ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 --SOlUTION TO QUESTIONS
 --Which age group is the  most in the hospital
 SELECT
-DISTINCT(age),
-count(*) AS count
+    DISTINCT(age),
+    count(*) AS num_of_patient
 FROM health_data
 GROUP BY DISTINCT(age)
-ORDER BY count DESC;
+ORDER BY 2 DESC
+LIMIT 1;
+--
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
