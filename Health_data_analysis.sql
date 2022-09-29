@@ -96,35 +96,39 @@ ALTER TABLE health_data ALTER COLUMN depression TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN copd TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 
+
 --SOlUTION TO QUESTIONS
---Which age group is the  most in the hospital
+--Which age is the  most in the hospital
 SELECT
     DISTINCT(age),
-    count(*) AS num_of_patient
+    count(*) AS number_of_patient
 FROM health_data
 GROUP BY DISTINCT(age)
 ORDER BY 2 DESC
 LIMIT 1;
---
+-- 141 patients are 89 years, which is the highest occuring age
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
 SELECT
-DISTINCT(age),
-outcome,
-count(*)
+  DISTINCT(age),
+  outcome,
+  count(*) AS Dead_patient
 FROM health_data
-GROUP BY DISTINCT(age),outcome
-ORDER BY age;
+WHERE outcome = 1
+GROUP BY 1,2
+ORDER BY 3 DESC;
+-- Patients at age 89 have the highest number of death with 23 patient dead
 
---- which genders is the most prevalent in the hospital?
+-- which genders is the most prevalent in the hospital?
 --WHERE 1 = Male and 2 = Female
 SELECT
-gender,
-count(*) AS count
+  gender,
+  count(*) AS number_of_patient
 FROM health_data
-GROUP BY gender
-ORDER BY count;
+GROUP BY 1
+ORDER BY 2;
+-- The female gender have the higher number of patients with 618 individuals
 
 --which gender group is having the highest number of death?
 SELECT
@@ -182,7 +186,7 @@ SELECT renal_failure,
        count(*) AS patient_with_renal_failure_alive
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 0 AND Renal_failure = 1
-GROUP BY 1, 2
+GROUP BY 1, 2;
 
 
 -- how many patients in the hospital with Hperlipemia are dead?
@@ -191,7 +195,7 @@ SELECT outcome,
        count(*) AS dead_patient_with_Hperlipemia
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND hyperlipemia = 0
-GROUP BY 1, 2
+GROUP BY 1, 2;
 
 
 -- how many patients in the hospital with Anemia are dead?
@@ -200,7 +204,7 @@ SELECT outcome,
        count(*) AS dead_patient_with_deficiencyanemias
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
-GROUP BY 1, 2
+GROUP BY 1, 2;
 
 -- what is the proportion of survival and non-survival between diabetic and non diabetic patients
 SELECT
