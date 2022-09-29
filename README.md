@@ -17,7 +17,7 @@ A data of more than 50 variables and 1176 observations
 * hypertensive: 0 = with and 1 = without
 * atrialfibrillation: 0 = with and 1 = without
 * CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without
-* diabetes: 0 = with and 1 without
+* diabetes: 0 = depressed and 1 not depressed
 * deficiencyanemias: 0 = with and 1 = without
 * depression: 0 = with and 1 = without
 * Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without
@@ -67,6 +67,7 @@ Based on the data available the following questions will be answered
 - which gender is the most prevalent in the hospital?
 - which gender group is having the highest number of death?
 - how many patients died in the hospital with atrial fibrillation?
+- how many male and female died in the hospital having atrial fibrillation?
 - how many patients in the hospital have depression?
 - Is there a correlation between depression and aging?
 - what is the rate of non-survived patients with hypertension?
@@ -77,3 +78,4 @@ Based on the data available the following questions will be answered
 - What is the proportion of survival and non-survival between depressed and non-depressed patients
 - Which of the gender have the highest proportion of death
 - What is the proportion of patients alive and patients dead
+- Is there a correlation between being dead and depressed?

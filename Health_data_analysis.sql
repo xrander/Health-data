@@ -131,28 +131,59 @@ ORDER BY 2;
 -- The female gender have the higher number of patients with 618 individuals
 
 --which gender group is having the highest number of death?
+-- WHERE outcome code 1 = dead, Gender 1 = Male and 2 = Female
 SELECT
-gender,
-outcome,
-count(*) AS count
+  gender,
+  count(*) AS number_of_patient
 FROM health_data
+WHERE outcome = 1
 GROUP BY gender, outcome
-ORDER BY count;
+ORDER BY 2 DESC
+LIMIT 1;
+-- Male is having the highest number of deaths with 80 male patients dead
 
 --how many patients died in the hospital with atrial fibrillation
+-- outcome code 1 = dead and atrialfibrillation code 0 = having and 1 = not having
 SELECT
-atrialfibrillation,
-outcome,
-count(*) AS count
+  atrialfibrillation,
+  outcome,
+  count(*) AS number_of_patient
 FROM health_data
-WHERE outcome IS NOT NULL
-GROUP BY atrialfibrillation, outcome
-ORDER BY count(*);
+WHERE outcome = 1 AND atrialfibrillation = 0
+GROUP BY 1, 2
+ORDER BY 3;
+-- 67 patients died of atritalfibrillation
+
+--how many male and female died in the hospital having atrial fibrillation
+-- outcome code 1 = dead and atrialfibrillation code 0 = having and 1 = not having
+SELECT
+  gender,
+  atrialfibrillation,
+  outcome,
+  count(*) AS number_of_patient
+FROM health_data
+WHERE outcome = 1 AND atrialfibrillation = 0
+GROUP BY 1, 2, 3
+ORDER BY 4;
+-- 28 Male and 39 Female
+
+--how many patients in the hospital have depression?
+-- 0 = depressed and 1 = not depressed
+SELECT
+  depression,
+  count(*) AS depressed_patient
+FROM health_data
+WHERE depression = 0
+GROUP BY 1
+ORDER BY 2;
+-- 1036 patients are depressed.
 
 -- Is there a correlation between depression and aging?
-SELECT corr(depression, age)
-      AS depression_age_ r -- r denotes the Pearson correlation coefficient
+SELECT
+  corr(depression, age)
+      AS depression_age_r -- r denotes the Pearson correlation coefficient
 FROM health_data;
+-- The results shows a very weak negative correlation between age and depression.
 
 -- Rate of gender with hypertension
 SELECT
@@ -165,7 +196,7 @@ SELECT
     (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_female
 
 FROM health_data
-GROUP BY hypertensive_male, hypertensive_female;
+GROUP BY 1, 2;
 
 
 -- what is the rate of non-survived patients with hypertension?
