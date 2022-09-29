@@ -75,3 +75,5 @@ Based on the data available the following questions will be answered
 - how many patients in the hospital with Anemia are dead?
 - What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 - What is the proportion of survival and non-survival between depressed and non-depressed patients
+- Which of the gender have the highest proportion of death
+- What is the proportion of patients alive and patients dead
