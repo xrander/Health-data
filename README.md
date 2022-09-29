@@ -62,7 +62,7 @@ A data of more than 50 variables and 1176 observations
 
 ## Questions
 Based on the data available the following questions will be answered
-- Which age group is the most in the hospital?
+- Which age is the most in the hospital?
 - which age group of patients dies more in the hospital?
 - which gender is the most prevalent in the hospital?
 - which gender group is having the highest number of death?

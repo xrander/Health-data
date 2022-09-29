@@ -194,10 +194,18 @@ WHERE outcome IS NOT NULL AND outcome = 1 AND hyperlipemia = 0
 GROUP BY 1, 2
 
 
--- - how many patients in the hospital with Anemia are dead?
+-- how many patients in the hospital with Anemia are dead?
 SELECT outcome,
        deficiencyanemias,
        count(*) AS dead_patient_with_deficiencyanemias
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
 GROUP BY 1, 2
+
+-- what is the proportion of survival and non-survival between diabetic and non diabetic patients
+SELECT
+  outcome,
+  diabetes,
+  COUNT(diabetes) AS outcome_with_disease
+FROM health_data
+GROUP BY outcome, diabetes
