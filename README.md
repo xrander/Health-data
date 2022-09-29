@@ -62,7 +62,7 @@ A data of more than 50 variables and 1176 observations
 
 ## Questions
 Based on the data available the following questions will be answered
-- Which age group is the most in the hospital?
+- Which age is the most in the hospital?
 - which age group of patients dies more in the hospital?
 - which gender is the most prevalent in the hospital?
 - which gender group is having the highest number of death?
@@ -75,3 +75,5 @@ Based on the data available the following questions will be answered
 - how many patients in the hospital with Anemia are dead?
 - What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 - What is the proportion of survival and non-survival between depressed and non-depressed patients
+- Which of the gender have the highest proportion of death
+- What is the proportion of patients alive and patients dead
