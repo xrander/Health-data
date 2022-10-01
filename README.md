@@ -17,9 +17,9 @@ A data of more than 50 variables and 1176 observations
 * hypertensive: 0 = with and 1 = without
 * atrialfibrillation: 0 = with and 1 = without
 * CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without
-* diabetes: 0 = depressed and 1 not depressed
+* diabetes: 0 = diabetic and 1 not diabetic
 * deficiencyanemias: 0 = with and 1 = without
-* depression: 0 = with and 1 = without
+* depression: 0 = depressed and 1 = not depressed
 * Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without
 * Renal_failure: 0 = without renal failure and 1 = with renal failure
 * COPD: chronic obstructive pulmonary disease(A disease causing airflow blockage and breathing related problems). 0 = without and 1 = without

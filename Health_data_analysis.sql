@@ -238,9 +238,46 @@ WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
 GROUP BY 1, 2;
 
 -- what is the proportion of survival and non-survival between diabetic and non diabetic patients
+--- to answer this question, we divide the question into two parts
+--- first part, we answer the proportion of diabetic and non diabetic patients that died
+--- for the second part, we query the proportion of diabetic that survived
+
+-- percentage of diabetic patients
 SELECT
-  outcome,
-  diabetes,
-  COUNT(diabetes) AS outcome_with_disease
-FROM health_data
-GROUP BY outcome, diabetes
+    round(
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0) :: NUMERIC(4,1)/ 
+        count(diabetes) * 100, 1)
+FROM health_data;
+-- 57.9% of all the patients are diabetic
+
+-- percentage of dead diabetic and non_diabetic patients
+SELECT
+    round(
+      dead.diabetic :: NUMERIC(4,1) / (dead.diabetic + dead.non_diabetic)
+      * 100, 2) pct_dead_diabetic,
+    round(
+      dead.non_diabetic :: NUMERIC(4,1) / (dead.diabetic + dead.non_diabetic)
+      * 100, 2) pct_dead_non_diabetic
+FROM
+    (SELECT
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 1 AND outcome = 1) AS non_diabetic,
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0 AND outcome = 1) AS diabetic
+    FROM health_data
+    GROUP BY 1,2) AS dead;
+-- 64.15 of all the dead patients have diabetes
+
+-- percentage of diabetic and non-diabetic patients that survived
+SELECT
+    round(
+        survived.diabetic :: NUMERIC(4,1) / (survived.diabetic + survived.non_diabetic)
+        * 100, 2) AS pct_survive_diabetic,
+    round(
+        survived.non_diabetic :: NUMERIC(4,1) / (survived.diabetic + survived.non_diabetic)
+        * 100, 2) AS pct_survived_non_diabetic
+FROM
+    (SELECT
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 1 AND outcome = 0) AS non_diabetic,
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0 AND outcome = 0) AS diabetic
+    FROM health_data
+    GROUP BY 1,2) AS survived;
+-- 56.93 percent of the patients that are still alive have diabetes
