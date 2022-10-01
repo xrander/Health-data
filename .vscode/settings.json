@@ -5,7 +5,37 @@
       "server": "localhost",
       "port": 5432,
       "driver": "PostgreSQL",
-      "name": "Postgre Local",
+      "name": "postgres",
+      "database": "dvdrental",
+      "username": "postgres",
+      "password": "Fisola@91"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "postgres",
+      "database": "dvdrental",
+      "username": "postgres",
+      "password": "Fisola@1991"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "postgres",
+      "database": "dvdrental",
+      "username": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "postgres",
       "database": "dvdrental",
       "username": "postgres",
       "password": "Fisola@91"

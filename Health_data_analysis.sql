@@ -131,8 +131,6 @@ SELECT
   gender,
   count(*) AS number_of_patient
 FROM health_data
-<<<<<<< HEAD
-=======
 GROUP BY 1
 ORDER BY 2;
 -- The female gender have the higher number of patients with 618 individuals
@@ -143,7 +141,6 @@ SELECT
   gender,
   count(*) AS number_of_patient
 FROM health_data
->>>>>>> Adu_part
 WHERE outcome = 1
 GROUP BY gender, outcome
 ORDER BY 2 DESC
