@@ -17,9 +17,9 @@ A data of more than 50 variables and 1176 observations
 * hypertensive: 0 = with and 1 = without
 * atrialfibrillation: 0 = with and 1 = without
 * CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without
-* diabetes: 0 = diabetic and 1 not diabetic
+* diabetes: 0 = with and 1 without
 * deficiencyanemias: 0 = with and 1 = without
-* depression: 0 = depressed and 1 = not depressed
+* depression: 0 = with and 1 = without
 * Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without
 * Renal_failure: 0 = without renal failure and 1 = with renal failure
 * COPD: chronic obstructive pulmonary disease(A disease causing airflow blockage and breathing related problems). 0 = without and 1 = without
@@ -62,20 +62,19 @@ A data of more than 50 variables and 1176 observations
 
 ## Questions
 Based on the data available the following questions will be answered
-- Which age is the most in the hospital?
+- Which age group is the most in the hospital?
 - which age group of patients dies more in the hospital?
 - which gender is the most prevalent in the hospital?
 - which gender group is having the highest number of death?
 - how many patients died in the hospital with atrial fibrillation?
-- how many male and female died in the hospital having atrial fibrillation?
 - how many patients in the hospital have depression?
 - Is there a correlation between depression and aging?
 - what is the rate of non-survived patients with hypertension?
+- Rate of gender with hypertension
 - How many patients with renal failure are alive in the hospital?
 - how many patients in the hospital with Hperlipemia are dead?
 - how many patients in the hospital with Anemia are dead?
 - What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 - What is the proportion of survival and non-survival between depressed and non-depressed patients
-- Which of the gender have the highest proportion of death
-- What is the proportion of patients alive and patients dead
-- Is there a correlation between being dead and depressed?
+    -- (a) What is the proportion of depressed and non-depressed that survived
+    -- (b) What is the proportion of depressed and non-depressed that did not survive
