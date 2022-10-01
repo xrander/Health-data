@@ -212,7 +212,7 @@ GROUP BY outcome, diabetes
 -- What is the proportion of survival and non-survival between depressed and non-depressed patients
   -- (a) What is the proportion of depressed to survive and not to survive
 SELECT
-    depression AS non_depressed_patient,
+    depression AS depressed_patient,
     round(
         ((SELECT count(depression):: decimal FROM health_data WHERE depression = 1 AND outcome = 0) /
     (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_survived_depression,
@@ -224,3 +224,5 @@ WHERE outcome IS NOT NULL AND depression = 0
 GROUP BY 1;
 
   -- (b) What is the proportion of non-depressed to survive and not to survive
+SELECT
+    depression AS non_depressed_patient,
