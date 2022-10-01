@@ -96,36 +96,43 @@ ALTER TABLE health_data ALTER COLUMN depression TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN copd TYPE INTEGER;
 ALTER TABLE health_data ALTER COLUMN outcome TYPE INTEGER;
 
-
 --SOlUTION TO QUESTIONS
---Which age is the  most in the hospital
+--Which age group is the  most in the hospital
 SELECT
     DISTINCT(age),
-    count(*) AS number_of_patient
+    count(*) AS num_of_patient
 FROM health_data
 GROUP BY DISTINCT(age)
 ORDER BY 2 DESC
 LIMIT 1;
--- 141 patients are 89 years, which is the highest occuring age
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
 SELECT
-  DISTINCT(age),
-  outcome,
-  count(*) AS Dead_patient
+DISTINCT(age),
+outcome,
+count(*)
 FROM health_data
-WHERE outcome = 1
-GROUP BY 1,2
-ORDER BY 3 DESC;
--- Patients at age 89 have the highest number of death with 23 patient dead
+GROUP BY DISTINCT(age),outcome
+ORDER BY age;
 
--- which genders is the most prevalent in the hospital?
+--- which genders is the most prevalent in the hospital?
 --WHERE 1 = Male and 2 = Female
+SELECT
+gender,
+count(*) AS count
+FROM health_data
+GROUP BY gender
+ORDER BY count;
+
+--which gender group is having the highest number of death?
+-- WHERE outcome code 1 = dead, Gender 1 = Male and 2 = Female
 SELECT
   gender,
   count(*) AS number_of_patient
 FROM health_data
+<<<<<<< HEAD
+=======
 GROUP BY 1
 ORDER BY 2;
 -- The female gender have the higher number of patients with 618 individuals
@@ -136,6 +143,7 @@ SELECT
   gender,
   count(*) AS number_of_patient
 FROM health_data
+>>>>>>> Adu_part
 WHERE outcome = 1
 GROUP BY gender, outcome
 ORDER BY 2 DESC
@@ -217,7 +225,7 @@ SELECT renal_failure,
        count(*) AS patient_with_renal_failure_alive
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 0 AND Renal_failure = 1
-GROUP BY 1, 2;
+GROUP BY 1, 2
 
 
 -- how many patients in the hospital with Hperlipemia are dead?
@@ -226,7 +234,7 @@ SELECT outcome,
        count(*) AS dead_patient_with_Hperlipemia
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND hyperlipemia = 0
-GROUP BY 1, 2;
+GROUP BY 1, 2
 
 
 -- how many patients in the hospital with Anemia are dead?
@@ -235,7 +243,37 @@ SELECT outcome,
        count(*) AS dead_patient_with_deficiencyanemias
 FROM health_data
 WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
-GROUP BY 1, 2;
+GROUP BY 1, 2
+
+
+-- What is the proportion of survival and non-survival between depressed and non-depressed patients
+  -- (a) What is the proportion of depressed to survive and not to survive
+SELECT
+    depression AS depressed_patient,
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression =0 AND outcome = 0) /
+    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_depressed_survived_,
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 0 AND outcome = 1) /
+    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_depressed_not_survived
+FROM health_data
+WHERE outcome IS NOT NULL AND depression = 0
+GROUP BY 1;
+
+  -- (b) What is the proportion of non-depressed to survive and not to survive
+SELECT
+    depression AS non_depressed_patient,
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 1 AND outcome = 0) /
+    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_non_depressed_survive
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 1 AND outcome = 1) /
+    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_non_depressed_not_survived
+FROM health_data
+WHERE outcome IS NOT NULL AND depression = 1
+GROUP BY 1;
+
+
 
 -- what is the proportion of survival and non-survival between diabetic and non diabetic patients
 --- to answer this question, we divide the question into two parts
