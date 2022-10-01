@@ -247,30 +247,28 @@ GROUP BY 1, 2
 
 
 -- What is the proportion of survival and non-survival between depressed and non-depressed patients
-  -- (a) What is the proportion of depressed to survive and not to survive
+  -- (a) What is the proportion of depressed and non-depressed that survived
 SELECT
-    depression AS depressed_patient,
-    round(
-        ((SELECT count(depression):: decimal FROM health_data WHERE depression =0 AND outcome = 0) /
-    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_depressed_survived_,
-    round(
-        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 0 AND outcome = 1) /
-    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_depressed_not_survived
-FROM health_data
-WHERE outcome IS NOT NULL AND depression = 0
-GROUP BY 1;
-
-  -- (b) What is the proportion of non-depressed to survive and not to survive
-SELECT
-    depression AS non_depressed_patient,
     round(
         ((SELECT count(depression):: decimal FROM health_data WHERE depression = 1 AND outcome = 0) /
-    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_non_depressed_survive
+        (SELECT count(depression) FROM health_data WHERE outcome = 0)) * 100, 2) AS pct_non_depressed_survive,
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 0 AND outcome = 0) /
+        (SELECT count(depression) FROM health_data WHERE outcome = 0)) * 100, 2) AS pct_depressed_survived
+FROM health_data
+WHERE outcome IS NOT NULL
+GROUP BY 1;
+
+  -- (b) What is the proportion of deppresed and non-depressed that did not survive
+SELECT
+    round(
+        ((SELECT count(depression):: decimal FROM health_data WHERE depression = 0 AND outcome = 1) /
+    (SELECT count(depression) FROM health_data WHERE outcome = 1)) * 100, 2) AS pct_depressed_not_survived,
     round(
         ((SELECT count(depression):: decimal FROM health_data WHERE depression = 1 AND outcome = 1) /
-    (SELECT count(depression) FROM health_data)) * 100, 2) AS pct_non_depressed_not_survived
+    (SELECT count(depression) FROM health_data WHERE outcome = 1)) * 100, 2) AS pct_non_depressed_not_survived
 FROM health_data
-WHERE outcome IS NOT NULL AND depression = 1
+WHERE outcome IS NOT NULL
 GROUP BY 1;
 
 
@@ -283,7 +281,7 @@ GROUP BY 1;
 -- percentage of diabetic patients
 SELECT
     round(
-        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0) :: NUMERIC(4,1)/ 
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0) :: NUMERIC(4,1)/
         count(diabetes) * 100, 1)
 FROM health_data;
 -- 57.9% of all the patients are diabetic
