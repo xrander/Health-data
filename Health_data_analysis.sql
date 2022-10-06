@@ -110,8 +110,8 @@ LIMIT 1;
 -- where 0 = alive and 1 = dead
 SELECT
 DISTINCT(age),
-outcome,
-count(*)
+  outcome,
+  count(*)
 FROM health_data
 GROUP BY DISTINCT(age),outcome
 ORDER BY age;
@@ -119,8 +119,8 @@ ORDER BY age;
 --- which genders is the most prevalent in the hospital?
 --WHERE 1 = Male and 2 = Female
 SELECT
-gender,
-count(*) AS count
+  gender,
+  count(*) AS count
 FROM health_data
 GROUP BY gender
 ORDER BY count;
@@ -267,7 +267,6 @@ SELECT
 FROM health_data
 WHERE outcome IS NOT NULL
 GROUP BY 1;
-
 
 
 -- what is the proportion of survival and non-survival between diabetic and non diabetic patients
