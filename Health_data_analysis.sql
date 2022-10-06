@@ -67,10 +67,10 @@ FROM health_data;
 --a data from outcome is having null and we'll remove that row
 -- Finding data with null value
 SELECT
-  id,
-  age,
-  outcome,
-  COUNT(*)
+id,
+age,
+outcome,
+COUNT(*)
 FROM health_data
 WHERE outcome IS NULL
 GROUP BY id, age, outcome;
@@ -102,30 +102,23 @@ SELECT
     DISTINCT(age),
     count(*) AS num_of_patient
 FROM health_data
-GROUP BY 1
+GROUP BY DISTINCT(age)
 ORDER BY 2 DESC
 LIMIT 1;
 
 --which age group of patients dies more in the hospital?
 -- where 0 = alive and 1 = dead
 SELECT
-<<<<<<< HEAD
 DISTINCT(age),
   outcome,
   count(*)
-=======
-  DISTINCT(age),
-  outcome,
-  count(*) AS num_of patients
->>>>>>> a47798c63ea5028bc0723f1e2e8c21bfbb682af8
 FROM health_data
-GROUP BY 1,2
+GROUP BY DISTINCT(age),outcome
 ORDER BY age;
 
 --- which genders is the most prevalent in the hospital?
 --WHERE 1 = Male and 2 = Female
 SELECT
-<<<<<<< HEAD
   gender,
   count(*) AS count
 FROM health_data
@@ -135,13 +128,12 @@ ORDER BY count;
 --which gender group is having the highest number of death?
 -- WHERE outcome code 1 = dead, Gender 1 = Male and 2 = Female
 SELECT
-=======
->>>>>>> a47798c63ea5028bc0723f1e2e8c21bfbb682af8
   gender,
-  count(*) AS num_of_patients
+  count(*) AS number_of_patient
 FROM health_data
 GROUP BY 1
-ORDER BY count;
+ORDER BY 2;
+-- The female gender have the higher number of patients with 618 individuals
 
 --which gender group is having the highest number of death?
 -- WHERE outcome code 1 = dead, Gender 1 = Male and 2 = Female
@@ -199,128 +191,88 @@ FROM health_data;
 -- The results shows a very weak negative correlation between age and depression.
 
 -- Rate of gender with hypertension
---- male = 1 and female = 2 hypentension code 0 = hypertensive, 1 = not_hypertensive 
 SELECT
   round(
-    ((SELECT
-      count(hypertensive):: decimal
-      FROM health_data
-      WHERE hypertensive = 0 AND gender = 1) /
-    (SELECT
-      count(hypertensive)
-      FROM health_data 
-      WHERE hypertensive = 0)) * 100, 2
-      ) AS hypertensive_male,
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 1) /
+    (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_male,
+
   round(
-    ((SELECT
-    count(hypertensive):: decimal
-    FROM health_data
-    WHERE hypertensive = 0 AND gender = 2) /
-    (SELECT
-    count(hypertensive)
-    FROM health_data
-    WHERE hypertensive = 0)) * 100, 2
-    ) AS hypertensive_female
+    ((SELECT count(hypertensive):: decimal FROM health_data WHERE hypertensive = 0 AND gender = 2) /
+    (SELECT count(hypertensive) FROM health_data)) * 100, 2) AS hypertensive_female
+
 FROM health_data
 GROUP BY 1, 2;
--- 46.19 percent of hypertensive patients are male and 51.81 percent of female are hypertensive
+
 
 -- what is the rate of non-survived patients with hypertension?
-SELECT
-  round(
-      ((SELECT count(outcome):: decimal
-        FROM health_data
-        WHERE hypertensive = 0 AND outcome = 1) /
-      (SELECT count(outcome)
-      FROM health_data
-      WHERE outcome = 1))
-       * 100, 2) AS pct_dead_with_hypertensive_patient
+SELECT hypertensive,
+       outcome,
+       round(
+        ((SELECT count(outcome):: decimal FROM health_data WHERE hypertensive = 0 AND outcome = 1) /
+        (SELECT count(outcome) FROM health_data WHERE hypertensive = 0))
+        * 100, 2) AS per_dead_hypertensive_patient
 FROM health_data
-GROUP BY 1;
--- 36.48 percent of the dead patients have hypertension
+WHERE outcome IS NOT NULL AND outcome = 1 AND hypertensive = 0
+GROUP BY 1,2,3;
 
 
 -- How many patients with renal failure are alive in the hospital?
----0 = without renal failure and 1 = with renal failure
-SELECT
-  renal_failure,
-  outcome,
-  count(*) AS patient_with_renal_failure_alive
+SELECT renal_failure,
+       outcome,
+       count(*) AS patient_with_renal_failure_alive
 FROM health_data
-WHERE outcome = 0 AND renal_failure = 1
-GROUP BY 1, 2;
--- 392 patients with renal failure are still alive
+WHERE outcome IS NOT NULL AND outcome = 0 AND Renal_failure = 1
+GROUP BY 1, 2
+
 
 -- how many patients in the hospital with Hperlipemia are dead?
-SELECT
-  outcome,
-  hyperlipemia,
-  count(*) AS dead_patient_with_Hperlipemia
+SELECT outcome,
+       hyperlipemia,
+       count(*) AS dead_patient_with_Hperlipemia
 FROM health_data
-WHERE outcome = 1 AND hyperlipemia = 0
-GROUP BY 1, 2;
---109 patients with hyperlipemia are dead
+WHERE outcome IS NOT NULL AND outcome = 1 AND hyperlipemia = 0
+GROUP BY 1, 2
 
 
 -- how many patients in the hospital with Anemia are dead?
-SELECT
-  outcome,
-  deficiencyanemias,
-  count(*) AS dead_patient_with_deficiency_anemias
+SELECT outcome,
+       deficiencyanemias,
+       count(*) AS dead_patient_with_deficiencyanemias
 FROM health_data
-WHERE outcome = 1 AND deficiencyanemias = 0
-GROUP BY 1, 2;
--- 124 patients with anemia deficieny are dead
+WHERE outcome IS NOT NULL AND outcome = 1 AND deficiencyanemias = 0
+GROUP BY 1, 2
 
 
 -- What is the proportion of survival and non-survival between depressed and non-depressed patients
-  -- (a) What is the proportion of patients that survived with or without depression
+  -- (a) What is the proportion of depressed and non-depressed that survived
 SELECT
-  round(
-    ((SELECT
-       count(depression):: decimal
-      FROM health_data
-      WHERE depression =0 AND outcome = 0) /
-      (SELECT count(depression)
-      FROM health_data
-      WHERE outcome = 0)) * 100, 2
-      ) AS pct_depressed_survived_,
-  round(
-    ((SELECT
-       count(depression):: decimal
-      FROM health_data
-      WHERE depression = 1 AND outcome = 0) /
-    (SELECT count(depression)
-      FROM health_data
-      WHERE outcome = 0)) * 100, 2
-       ) AS pct_not_depressed_survived
-FROM health_data
-GROUP By 1;
-
-  -- (b) What is the proportion of dead patients with and without depression
-SELECT
-  round(
+    round(
+        alive.depressed :: NUMERIC(4,1) / (alive.depressed + alive.non_depressed)
+        * 100, 2) AS pct_alive_depressed,
+    round(
+        alive.non_depressed :: NUMERIC(4,1) / (alive.depressed + alive.non_depressed)
+        * 100, 2) AS pct_alive_non_depressed
+FROM
     (SELECT
-      count(depression):: decimal 
-    FROM health_data
-    WHERE depression = 1 AND outcome = 1) /
-    (SELECT count(depression)
-    FROM health_data
-    WHERE outcome = 1) * 100, 2
-    ) AS pct_not_depressed_not_survive,
-  round(
-    ((SELECT
-      count(depression):: decimal
-    FROM health_data
-    WHERE depression = 0 AND outcome = 1) /
-    (SELECT 
-      count(depression)
-    FROM health_data
-    WHERE outcome = 1)) * 100, 2
-    ) AS pct_depressed_not_survived
-FROM health_data
-GROUP BY 1
-;
+        (SELECT count(depression) FROM health_data WHERE depression = 0 AND outcome = 0) AS depressed,
+        (SELECT count(depression) FROM health_data WHERE depression = 1 AND outcome = 0) AS non_depressed
+     FROM health_data
+     GROUP BY 1,2) AS alive;
+
+  -- (b) What is the proportion of deppresed and non-depressed that did not survive
+SELECT
+    round(
+        dead.depressed :: NUMERIC(4,1) / (dead.depressed + dead.non_depressed)
+        * 100, 2) AS pct_dead_depressed,
+    round(
+        dead.non_depressed :: NUMERIC(4,1) / (dead.depressed + dead.non_depressed)
+        * 100, 2) AS pct_dead_non_depressed
+FROM
+    (SELECT
+        (SELECT count(depression) FROM health_data WHERE depression = 0 AND outcome = 1) AS depressed,
+        (SELECT count(depression) FROM health_data WHERE depression = 1 AND outcome = 1) AS non_depressed
+     FROM health_data
+     GROUP BY 1,2) AS dead;
 
 
 -- what is the proportion of survival and non-survival between diabetic and non diabetic patients
@@ -328,69 +280,42 @@ GROUP BY 1
 --- first part, we answer the proportion of diabetic and non diabetic patients that died
 --- for the second part, we query the proportion of diabetic that survived
 
--- percentage of diabetic and non_diabetic patients
+-- percentage of diabetic patients
 SELECT
-  round(
-      (SELECT
-      count(diabetes)
-    FROM health_data
-    WHERE diabetes = 0) :: NUMERIC(4,1)/ 
-      count(diabetes) * 100, 1
-      ) AS diabetic_patients,
-  round (
-      (SELECT
-        count(diabetes)
-      FROM health_data
-      WHERE diabetes = 1) :: NUMERIC(4,1)/ 
-        count(diabetes) * 100, 1
-        ) AS non_diabetic_patients
+    round(
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0) :: NUMERIC(4,1)/
+        count(diabetes) * 100, 1)
 FROM health_data;
 -- 57.9% of all the patients are diabetic
 
 -- percentage of dead diabetic and non_diabetic patients
 SELECT
-  round(
-    dead.diabetic :: NUMERIC(4,1) /
-     (dead.diabetic + dead.non_diabetic)
-    * 100, 2) pct_dead_diabetic,
-  round(
-    dead.non_diabetic :: NUMERIC(4,1) / 
-    (dead.diabetic + dead.non_diabetic)
-    * 100, 2) pct_dead_non_diabetic
+    round(
+      dead.diabetic :: NUMERIC(4,1) / (dead.diabetic + dead.non_diabetic)
+      * 100, 2) pct_dead_diabetic,
+    round(
+      dead.non_diabetic :: NUMERIC(4,1) / (dead.diabetic + dead.non_diabetic)
+      * 100, 2) pct_dead_non_diabetic
 FROM
     (SELECT
-      (SELECT
-        count(diabetes)
-      FROM health_data
-      WHERE diabetes = 1 AND outcome = 1) AS non_diabetic,
-      (SELECT
-        count(diabetes) 
-      FROM health_data
-      WHERE diabetes = 0 AND outcome = 1) AS diabetic
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 1 AND outcome = 1) AS non_diabetic,
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0 AND outcome = 1) AS diabetic
     FROM health_data
     GROUP BY 1,2) AS dead;
 -- 64.15 of all the dead patients have diabetes
 
 -- percentage of diabetic and non-diabetic patients that survived
 SELECT
-  round(
-      survived.diabetic :: NUMERIC(4,1) /
-       (survived.diabetic + survived.non_diabetic)
-      * 100, 2) AS pct_survive_diabetic,
-  round(
-      survived.non_diabetic :: NUMERIC(4,1) /
-      (survived.diabetic + survived.non_diabetic)
+    round(
+        survived.diabetic :: NUMERIC(4,1) / (survived.diabetic + survived.non_diabetic)
+        * 100, 2) AS pct_survive_diabetic,
+    round(
+        survived.non_diabetic :: NUMERIC(4,1) / (survived.diabetic + survived.non_diabetic)
         * 100, 2) AS pct_survived_non_diabetic
 FROM
     (SELECT
-      (SELECT
-        count(diabetes)
-      FROM health_data
-      WHERE diabetes = 1 AND outcome = 0) AS non_diabetic,
-      (SELECT
-        count(diabetes)
-      FROM health_data
-      WHERE diabetes = 0 AND outcome = 0) AS diabetic
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 1 AND outcome = 0) AS non_diabetic,
+        (SELECT count(diabetes) FROM health_data WHERE diabetes = 0 AND outcome = 0) AS diabetic
     FROM health_data
     GROUP BY 1,2) AS survived;
 -- 56.93 percent of the patients that are still alive have diabetes
