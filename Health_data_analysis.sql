@@ -53,6 +53,7 @@ CREATE TABLE health_data(
     EF SMALLINT
 );
 
+
 --importing data from local directory--
 
 COPY health_data
