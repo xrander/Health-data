@@ -290,8 +290,29 @@ hyperli <- as.data.frame(health_rec %>% select(gender, Hyperlipemia) %>%
 sum(hyperli$hyperlip) # 729 patients are having hyperlipermia
 
 gender <- merge(gender, hyperli, by = 'gender', all = T) # merging to gender
-# how many patients in the hospital with Anemia are dead?
-health_rec 
+
+#############################################################################
+
+# Question 12 how many patients in the hospital with Anemia are dead?
+anemia <- as.data.frame(health_rec %>%
+                          select(outcome, gender, deficiencyanemias) %>%
+                          filter(outcome == 'Dead', deficiencyanemias == 'Having') %>%
+                          group_by(gender) %>%
+                          summarise(anemia_dead = length(deficiencyanemias)))
+gender<- merge(gender, anemia, by = 'gender', all = T) # merging to gender
+sum(gender$anemia_dead) # the sum of dead patients having anemia is 124
+
+# Question 12b: Total sum of patients having anemia
+anemia_tot <- as.data.frame(health_rec %>%
+  select(gender, deficiencyanemias) %>%
+  filter(deficiencyanemias == 'Having') %>%
+  group_by(gender) %>%
+  summarise(anemia_tot = length(deficiencyanemias)))
+gender <- merge(gender, anemia_tot, by = 'gender', all = T) #merging to gender
+sum(gender$anemia_tot) ## 777 patients is having anemia
+
+############################################################################
+
 # What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 
 # What is the proportion of survival and non-survival between depressed and non-depressed patients
