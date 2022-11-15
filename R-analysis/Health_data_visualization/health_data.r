@@ -57,7 +57,10 @@ health_rec$hypertensive <- ifelse(health_rec$hypertensive == '0',
                                   'Having','Not Having')
 health_rec$Renal_failure <- ifelse(health_rec$Renal_failure == '0',
                                    'Not having','Having')
-
+health_rec$Hyperlipemia <- ifelse(health_rec$Hyperlipemia == 0,
+                                  'Having','Not Having')
+health_rec$deficiencyanemias <- ifelse(health_rec$deficiencyanemia == 0,
+                                       'Having', 'Not Having')
 
 #############################################################################
 
@@ -268,10 +271,27 @@ renal_dead <- as.data.frame(health_rec %>% select(outcome, gender,Renal_failure)
   summarise(length(Renal_failure)))
 gender <- merge(gender, renal_dead, by = 'gender', all = T) #merging result to gender dataframe
 
-# how many patients in the hospital with Hperlipemia are dead?
+##############################################################################
 
+# Question 11: how many patients in the hospital with Hyperlipemia are dead?
+dead_hyperli <- as.data.frame(health_rec %>% select(outcome, gender, Hyperlipemia) %>%
+  filter(outcome  == 'Dead', Hyperlipemia == 'Having') %>%
+  group_by(gender) %>%
+  summarize (dead_hyperli = length(Hyperlipemia)))
+gender <- merge(gender, dead_hyperli, by = 'gender', all = T) # merging to gender
+
+sum(gender$dead_hyperli) #109 patients died having hyperlipermia
+
+# Question 11b: How many patients are having hyperlipemia
+hyperli <- as.data.frame(health_rec %>% select(gender, Hyperlipemia) %>%
+  filter(Hyperlipemia == 'Having') %>%
+  group_by(gender) %>%
+  summarize(hyperlip = length(Hyperlipemia)))
+sum(hyperli$hyperlip) # 729 patients are having hyperlipermia
+
+gender <- merge(gender, hyperli, by = 'gender', all = T) # merging to gender
 # how many patients in the hospital with Anemia are dead?
-
+health_rec 
 # What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 
 # What is the proportion of survival and non-survival between depressed and non-depressed patients
