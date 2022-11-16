@@ -52,7 +52,7 @@ health_rec$gender <- ifelse(health_rec$gender == '1', 'Male', 'Female')
 health_rec$atrialfibrillation <- ifelse(health_rec$atrialfibrillation == '0',
                                         'Having', 'Not having')
 health_rec$depression <- ifelse(health_rec$depression == 0, 'Having',
-                                'Not having')
+                                'Not Having')
 health_rec$hypertensive <- ifelse(health_rec$hypertensive == '0', 
                                   'Having','Not Having')
 health_rec$Renal_failure <- ifelse(health_rec$Renal_failure == '0',
@@ -325,26 +325,120 @@ sum(gender$anemia_tot) ## 777 patients is having anemia
 ############################################################################
 
 # 13: What is the proportion of survival and non-survival between diabetic and non-diabetic patients
+# Short preview of the stats relating to diabetic patients
+health_rec %>% select(outcome, diabetes) %>%
+  group_by(outcome, diabetes) %>%
+  summarize(count = length(diabetes))
+
 # 13a1: The proportion of patients having diabetes
 diabeteic <- as.data.frame(health_rec %>% select(diabetes) %>%
   filter(diabetes == 'Having') %>%
   summarize(length(diabetes))) # this returns the total number of diabetic patients
 
-diabeteic$`length(diabetes)`/length(health_rec$outcome) # this returns the percentage if diabetic patients
+diabeteic$`length(diabetes)`/length(health_rec$outcome) # this returns the percentage of diabetic patients
   ## 57.9% of the patients are diabetic
 
 #13b: Proportion of diabetic that survived
+# To get the proportion of diabetic patient that survived, we need to know the total number of people having diabetic
+# we divide that by the number of people having diabetes and survived
+
 having_diabetes_alive <- as.data.frame(health_rec %>% select(outcome, diabetes) %>%
   filter(outcome == 'Alive', diabetes == 'Having') %>%
   summarize(having_diabetes = length(diabetes))) # returns the patients having diabetes and still alive
-health_rec %>% select(outcome) %>% 
 
-not_having_diabetes_alive <- as.data.frame(health_rec %>% select(outcome, diabetes) %>%
-    filter(outcome == 'Alive', diabetes == 'Not having') %>%
-    summarize(not_having_alive = length(diabetes))) # returns patients not having diabetes and alive
-having_diabetes_alive
+having_diabetes <- as.data.frame(health_rec %>% 
+             select(diabetes) %>%
+             filter(diabetes == 'Having') %>%
+             summarize(diabetic = length(diabetes))) # returns patients having diabetes dead or alive
+
+having_diabetes_alive$having_diabetes/having_diabetes$diabetic * 100 # proportion of diabetic patients alive
+  ##  85% of diabetic patients are alive
+
+#13b2: Proportion of non-diabetic that survived
+# for this we follow the same procedure as the one above but this time, the patients are not diabetic
+non_diabetic_alive <- health_rec %>% select(outcome, diabetes) %>%
+  filter(outcome == 'Alive', diabetes == 'Not Having') %>%
+  summarize(non_diabetes = length(diabetes)) # this returns non-diabetic patients that are alive
+
+non_diabetic <- health_rec %>% 
+  select(diabetes) %>%
+  filter(diabetes == 'Not Having') %>%
+  summarize(non_diabetic = length(diabetes)) #this returns non-diabetic dead or alive
+
+non_diabetic_alive$non_diabetes/non_diabetic$non_diabetic * 100 # this returns the proportion of non-diabetic that are alive
+  ## 88.5% of the patients are not having diabetes and are alive
+
+#13c: Proportion of diabetic that died
+dead_diabetic <- health_rec %>% select(outcome, diabetes) %>%
+  filter(diabetes == 'Having', outcome == 'Dead') %>%
+  summarize (diabetic = length(diabetes)) # num of dead diabetic patients
+
+dead_diabetic$diabetic/having_diabetes$diabetic * 100 #this returns the proportion of dead diabetics
+  ## about 14.98 percent of the diabetics are dead
+
+#13c2: Proportion of non_diabetic that died
+dead_non_diabetic <- health_rec %>% select(outcome, diabetes) %>%
+  filter(diabetes == 'Not Having', outcome == 'Dead') %>%
+  summarize (non_diabetic=length(diabetes)) # num of dead non-diabetic patients
 
 
-# What is the proportion of survival and non-survival between depressed and non-depressed patients
-  # (a) What is the proportion of depressed and non-depressed that survived
-  # (b) What is the proportion of depressed and non-depressed that did not survive
+dead_non_diabetic$non_diabetic/non_diabetic$non_diabetic * 100 # this returns the proportion of dead non-diabetics
+  ## 11.52 percent of non diabetics are dead.
+
+#########################################################################################
+
+# Question 14: What is the proportion of survival and non-survival between depressed and non-depressed patients
+# Short preview of the stats relating to depressed patients
+health_rec %>% select(outcome, depression) %>%
+  group_by(outcome, depression) %>%
+  summarize(count = length(outcome))
+
+# Question 14a: What is the proportion of depressed and non-depressed that survived
+depressed <- as.data.frame(health_rec %>% select(depression) %>%
+ filter(depression == 'Having') %>%
+ summarize(depressed = length(depression))) # this returns the total number of depressed patients either dead or alive
+
+depressed$depressed/length(health_rec$outcome) # this returns the percentage of depressed patients
+## 88.1 percent of the patients are depressed
+
+#14a1: Proportion of depressed patients that survived
+having_depression_alive <- as.data.frame(health_rec %>% select(outcome, depression) %>%
+   filter(outcome == 'Alive', depression == 'Having') %>%
+   summarize(having_depression = length(depression))) # returns the patients having depression and still alive
+
+having_depression_alive$having_depression/depressed$depressed * 100 # proportion of depressed patients alive
+##  85.7% of depressed patients are alive
+
+#14a2: Proportion of non-depressed that survived
+# for this we follow the same procedure as the one above but this time, the patients are not depressed
+non_depressed_alive <- health_rec %>% select(outcome, depression) %>%
+  filter(outcome == 'Alive', depression == 'Not Having') %>%
+  summarize(non_depression = length(depression)) # this returns non-depressed patients that are alive
+
+non_depressed <- health_rec %>% 
+  select(depression) %>%
+  filter(depression == 'Not Having') %>%
+  summarize(non_depressed = length(depression)) #this returns non-depressed patients count dead or alive
+
+non_depressed_alive$non_depression/non_depressed$non_depressed * 100 # this returns the proportion of non-depressed patients that are alive
+## 92.1% percent of the patients are not having depression and are alive
+
+#14b: Proportion of depressed patients that died
+dead_depressed <- health_rec %>% select(outcome, depression) %>%
+  filter(depression == 'Having', outcome == 'Dead') %>%
+  summarize (depressed = length(depression)) # num of dead depressed patients
+
+dead_depressed$depressed/depressed$depressed * 100 #this returns the proportion of dead depressed patients
+## about 14.28 percent of the depressed patients are dead
+
+#14b: Proportion of non_depressed patients that died
+dead_non_depressed <- health_rec %>% select(outcome, depression) %>%
+  filter(depression == 'Not Having', outcome == 'Dead') %>%
+  summarize (non_depressed=length(depression)) # num of dead non-diabetic patients
+
+dead_non_depressed$non_depressed/non_depressed$non_depressed * 100 # this returns the proportion of dead non-diabetics
+## 7.86 percent of the non-depressed patients are dead.
+
+
+# Check the number of patients having more than one health problem
+
