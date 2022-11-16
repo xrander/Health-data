@@ -260,7 +260,7 @@ FROM
      FROM health_data
      GROUP BY 1,2) AS alive;
 
-  -- (b) What is the proportion of deppresed and non-depressed that did not survive
+  -- (b) What is the proportion of depressed and non-depressed that did not survive
 SELECT
     round(
         dead.depressed :: NUMERIC(4,1) / (dead.depressed + dead.non_depressed)

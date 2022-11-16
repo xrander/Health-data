@@ -61,6 +61,7 @@ health_rec$Hyperlipemia <- ifelse(health_rec$Hyperlipemia == 0,
                                   'Having','Not Having')
 health_rec$deficiencyanemias <- ifelse(health_rec$deficiencyanemia == 0,
                                        'Having', 'Not Having')
+health_rec$diabetes <- ifelse(health_rec$diabetes== 0, 'Having','Not Having')
 
 #############################################################################
 
@@ -163,7 +164,9 @@ dead_patients_atrial_gender <- as.data.frame(health_rec %>% select(outcome, gend
   ## 39 female and 28 male died having atrialfibrillation
 gender <- merge(gender, dead_patients_atrial_gender,
                 by = 'gender', all = TRUE) # merging the result to gender table
-names(gender)[6] <- 'died_having_atrialfibrilation'
+
+
+################################################################################
 
 # Question 6: how many patients in the hospital have depression?
 View(sort(table(health_rec$depression)))
@@ -211,7 +214,11 @@ barchart(num_of_patients~depression|gender,
          xlab = substitute(paste(bold('Depression'))),
          ylab = substitute(paste(bold('Number of patients'))))
 
+##########################################################################
+
 # Question 7:  Is there a correlation between depression and aging?
+
+##########################################################################
 
 
 # Question 8: what is the rate of non-survived patients with hypertension?
@@ -226,6 +233,8 @@ hypertensive <- health_rec %>% select(outcome, hypertensive) %>%
 rate_dead_hypertensive <-  dead_hyper$dead_hypertensive/
   hypertensive$hypertensive * 100# this returns the dead per hypertensive patient
     ## The rate is 17.5 dead per 100 hypertensive patient
+
+###########################################################################
 
 # Question 9: Rate of the different gender with hypertension per 100 patients
 gender_hyper <- as.data.frame(health_rec %>% select(gender, hypertensive) %>%
@@ -246,6 +255,8 @@ dead_gender_hyper <- as.data.frame(health_rec %>% select(outcome,gender, hyperte
 gender <- merge(gender, dead_gender_hyper, by = 'gender', all = T)
   ##31 female and 27 male of the dead patients had hypertension
   
+###########################################################################
+
 # Question 10: How many patients with renal failure are alive in the hospital?
 health_rec %>% select(outcome, Renal_failure) %>% 
   filter(outcome == 'Alive', Renal_failure == 'Having') %>%
@@ -313,7 +324,26 @@ sum(gender$anemia_tot) ## 777 patients is having anemia
 
 ############################################################################
 
-# What is the proportion of survival and non-survival between diabetic and non-diabetic patients
+# 13: What is the proportion of survival and non-survival between diabetic and non-diabetic patients
+# 13a1: The proportion of patients having diabetes
+diabeteic <- as.data.frame(health_rec %>% select(diabetes) %>%
+  filter(diabetes == 'Having') %>%
+  summarize(length(diabetes))) # this returns the total number of diabetic patients
+
+diabeteic$`length(diabetes)`/length(health_rec$outcome) # this returns the percentage if diabetic patients
+  ## 57.9% of the patients are diabetic
+
+#13b: Proportion of diabetic that survived
+having_diabetes_alive <- as.data.frame(health_rec %>% select(outcome, diabetes) %>%
+  filter(outcome == 'Alive', diabetes == 'Having') %>%
+  summarize(having_diabetes = length(diabetes))) # returns the patients having diabetes and still alive
+health_rec %>% select(outcome) %>% 
+
+not_having_diabetes_alive <- as.data.frame(health_rec %>% select(outcome, diabetes) %>%
+    filter(outcome == 'Alive', diabetes == 'Not having') %>%
+    summarize(not_having_alive = length(diabetes))) # returns patients not having diabetes and alive
+having_diabetes_alive
+
 
 # What is the proportion of survival and non-survival between depressed and non-depressed patients
   # (a) What is the proportion of depressed and non-depressed that survived
