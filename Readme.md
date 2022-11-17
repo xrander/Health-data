@@ -99,21 +99,22 @@ observations
 ## Questions
 
 ![](https://i.pinimg.com/originals/0e/53/94/0e53948c0d24283e7cdd42f9bb0bda4e.jpg)
-*imagesource: pinterest* Based on the data available the following
-questions will be answered - Which age group is the most in the
-hospital? - which age group of patients dies more in the hospital? -
-which gender is the most prevalent in the hospital? - which gender group
-is having the highest number of death? - how many patients died in the
-hospital with atrial fibrillation? - how many patients in the hospital
-have depression? - what is the rate of non-survived patients with
-hypertension? - Rate of gender with hypertension - How many patients
-with renal failure are alive in the hospital? - how many patients in the
-hospital with Hperlipemia are dead? - how many patients in the hospital
-with Anemia are dead? - What is the proportion of survival and
-non-survival between diabetic and non-diabetic patients - What is the
-proportion of survival and non-survival between depressed and
-non-depressed patients – (a) What is the proportion of depressed and
-non-depressed that survived – (b) What is the proportion of depressed
-and non-depressed that did not survive
+<p>*imagesource: pinterest*</p>
+<p> Based on the data available the following questions will be answered</p>
+<p>- Which age group is the most in the hospital?</p>
+<p>- which age group of patients dies more in the hospital?</p>
+<p>- which gender is the most prevalent in the hospital? </p> 
+<p>- which gender group is having the highest number of death? </p> 
+<p>- how many patients died in the hospital with atrial fibrillation?</p>
+<p>- how many patients in the hospital have depression?</p>
+<p>- what is the rate of non-survived patients with hypertension?</p>
+<p>- Rate of gender with hypertension</p>
+<p>- How many patients with renal failure are alive in the hospital?</p>
+<p>- how many patients in the hospital with Hperlipemia are dead?</p>
+<p>- how many patients in the hospital with Anemia are dead?</p> 
+<p>- What is the proportion of survival and non-survival between diabetic and non-diabetic patients</p>
+<p>- What is the proportion of survival and non-survival between depressed and non-depressed patients</p>
+<p>– (a) What is the proportion of depressed and non-depressed that survived </p>
+<p>- (b) What is the proportion of depressed and non-depressed that did not survive
 
 [solution](solution.md)
