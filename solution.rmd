@@ -1,10 +1,15 @@
 ---
 title: "Retrospective Health Data Analysis"
 author: "Olamide Adu"
-date: "2022-11-16"
+date: "2023-03-25"
 output:
-  md_document:
-    variant: markdown_github
+   prettydoc::html_pretty:
+    theme: 'oldstyle'
+    toc: true
+    toc_float: false
+    highlight: github
+    code_theme: zenburn
+    keep_md: true
 editor_options: 
   markdown: 
     wrap: 72
@@ -60,13 +65,11 @@ health_rec <- health_rec[!is.na(health_rec$outcome),] #removing the missing outc
 length(health_rec$outcome) 
 ```
 
-There is no missing data again in the part of the outcome. -- The data
-have reduced to 1176 from 1177
+There is no missing data again in the part of the outcome. -- The data have reduced to 1176 from 1177
 
 ## Data transformation
 
-some data are categorical data and they've been changed to factor type
-of data
+some data are categorical data and they've been changed to factor type of data
 
 ```{r}
 health_rec$outcome  <-as.factor(health_rec$outcome)
@@ -149,8 +152,7 @@ barchart(age_groups,
          col = 'red')
 ```
 
-**ANSWER** Patients between the age 81 to 91 are the highest in the
-hospital with age 89 been the highest
+**ANSWER** Patients between the age 81 to 91 are the highest in the hospital with age 89 been the highest
 
 ## Question 2
 
@@ -171,8 +173,7 @@ barplot(sort(table(dead_patients$age)),
         ylim = c(0, 30))
 ```
 
-**ANSWER** Patients at age 89 are the highest to die, with 23 patients
-dying
+**ANSWER** Patients at age 89 are the highest to die, with 23 patients dying
 
 ## Question 3:
 
@@ -253,8 +254,7 @@ gender <- merge(gender, atrial, by = 'gender', all = T)
 atrialfibrillation 
 
 ### Question 5c
-Number of patients that died between
-the gender having atrialfibrillation 
+Number of patients that died between the gender having atrialfibrillation 
 ```{r}
 dead_patients_atrial_gender <-
 as.data.frame(health_rec %>% select(outcome, gender,
@@ -400,6 +400,7 @@ health_rec %>%
   summarise(length(Renal_failure))
 ```
 **ANSWER** 392 patients are having renal failure and alive
+
 ### Question 10b
 How many patients died having renal failure
 ```{r}
@@ -520,9 +521,9 @@ diabeteic$`length(diabetes)`/length(health_rec$outcome) # this returns the perce
 **ANSWER** 57.9% of the patients are diabetic
 
 ### 13b
-Proportion of diabetic that survived 
-To get the proportion of diabetic patient that survived, we need to know the total number of
-people having diabetic and we divide that by the number of people having diabetes and survived
+Proportion of diabetic that survived
+
+To get the proportion of diabetic patient that survived, we need to know the total number of people having diabetic and we divide that by the number of people having diabetes and survived
 ```{r}
 having_diabetes_alive <- as.data.frame(health_rec %>%
    select(outcome, diabetes) %>%
@@ -540,8 +541,7 @@ having_diabetes_alive$having_diabetes/having_diabetes$diabetic * 100 # proportio
 
 #### 13b2
 Proportion of non-diabetic that survived.
-For this we follow the same procedure as the one above but this time, the patients are not
-diabetic 
+For this we follow the same procedure as the one above but this time, the patients are not diabetic 
 ```{r}
 non_diabetic_alive <- health_rec %>% 
   select(outcome, diabetes) %>%
@@ -619,6 +619,7 @@ having_depression_alive$having_depression/depressed$depressed * 100 # proportion
 
 #### 14a2
 Proportion of non-depressed that survived
+
 For this we follow the same procedure as the one above but this time, the patients are not depressed
 ```{r}
 non_depressed_alive <- health_rec %>%
