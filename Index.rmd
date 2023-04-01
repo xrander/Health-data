@@ -169,3 +169,8 @@ observations
 
 <p>- What is the proportion of survival and non-survival between depressed and non-depressed patients
 </p>
+
+# Solutions
+[click to go solutions](solution.html)
+<br>
+[Portfolio page](https://olamideadu.com)

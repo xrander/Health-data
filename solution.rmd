@@ -661,4 +661,6 @@ dead_non_depressed$non_depressed/non_depressed$non_depressed * 100 # this return
 ```
 **ANSWER** 7.86 percent of the non-depressed patients are dead.
 
-# Check the number of patients having more than one health problem
+[back to project page](Index.html)
+
+[portfolio page](https://olamideadu.com)
