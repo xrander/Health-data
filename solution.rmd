@@ -1,0 +1,666 @@
+---
+title: "Retrospective Health Data Analysis"
+author: "Olamide Adu"
+date: "2023-03-25"
+output:
+   prettydoc::html_pretty:
+    theme: 'oldstyle'
+    toc: true
+    toc_float: false
+    highlight: github
+    code_theme: zenburn
+    keep_md: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Health Data Anlaysis
+
+![](https://wwwassets.rand.org/content/rand/randeurope/research/projects/value-of-health-data/jcr:content/par/teaser.aspectfit.0x1200.jpg/1598898639579.jpg)
+*image source: rand.org* *importing libraries*
+
+```{r}
+library('doBy')
+library('lattice')
+library('dplyr')
+library('tidyverse')
+library(data.table)
+```
+
+**Loading Data Set**
+
+```{r}
+health_rec <- read.table('https://raw.githubusercontent.com/xrander/Health-data/master/Health_data.csv',
+           header = T,
+           sep = ',',
+           na.strings = NA,
+           dec = '.',
+           strip.white = T)
+
+health_rec <- setDT(health_rec)
+head(health_rec)
+```
+
+##Data Explorartion
+
+```{r results='hide'}
+str(health_rec) # data structure
+
+summary(health_rec) # quick statistics
+
+nrow(health_rec)
+```
+
+## Dealing with NA's for outcome
+
+Some of the data is having NA, that happens in big data, outcome is the
+most important here and cannot be left as NA
+
+```{r}
+health_rec[is.na(health_rec$outcome),]
+
+health_rec <- health_rec[!is.na(health_rec$outcome),] #removing the missing outcome data
+
+length(health_rec$outcome) 
+```
+
+There is no missing data again in the part of the outcome. -- The data have reduced to 1176 from 1177
+
+## Data transformation
+
+some data are categorical data and they've been changed to factor type of data
+
+```{r}
+health_rec$outcome  <-as.factor(health_rec$outcome)
+health_rec$gender <- as.factor(health_rec$gender)
+health_rec$COPD <- as.factor(health_rec$COPD)
+health_rec$Renal_failure <-as.factor(health_rec$Renal_failure)
+health_rec$hypertensive <- as.factor(health_rec$hypertensive)
+health_rec$atrialfibrillation <- as.factor(health_rec$atrialfibrillation)
+health_rec$CHD_with_no_MI <- as.factor(health_rec$CHD_with_no_MI)
+health_rec$diabetes <- as.factor(health_rec$diabetes)
+health_rec$deficiencyanemias <- as.factor(health_rec$deficiencyanemias)
+health_rec$depression <- as.factor(health_rec$depression)
+health_rec$Hyperlipemia <- as.factor(health_rec$Hyperlipemia)
+health_rec$Renal_failure <- as.factor(health_rec$Renal_failure)
+```
+
+# Assigning values to codes
+
+We assigned some values to the codes to aid easy analysis
+
+```{r}
+health_rec$outcome <- ifelse(health_rec$outcome == '0', 'Alive', 'Dead')
+health_rec$gender <- ifelse(health_rec$gender == '1', 'Male', 'Female')
+health_rec$atrialfibrillation <- ifelse(health_rec$atrialfibrillation == '0',
+                                        'Having', 'Not having')
+health_rec$depression <- ifelse(health_rec$depression == 0, 'Having',
+                                'Not Having')
+health_rec$hypertensive <- ifelse(health_rec$hypertensive == '0', 
+                                  'Having','Not Having')
+health_rec$Renal_failure <- ifelse(health_rec$Renal_failure == '0',
+                                   'Not having','Having')
+health_rec$Hyperlipemia <- ifelse(health_rec$Hyperlipemia == 0,
+                                  'Having','Not Having')
+health_rec$deficiencyanemias <- ifelse(health_rec$deficiencyanemia == 0,
+                                       'Having', 'Not Having')
+health_rec$diabetes <- ifelse(health_rec$diabetes== 0, 'Having','Not Having')
+```
+
+------------------------------------------------------------------------
+
+# QUESTIONS
+
+## Question 1
+
+Which age is the most in the hospital?
+
+```{r}
+sort(table(health_rec$age), decreasing = T)
+# Visuals
+barplot(sort(table(health_rec$age), decreasing = T),
+        col = 'blue',
+        main = 'Age distribution of patients',
+        ylim = c(0, 160),
+        ylab = 'Number of patients',
+        xlab = 'Age of Patients')
+```
+
+**ANSWER** Patients that are 89 years of age are the highest.
+
+### Question 1b
+
+Which age group is the most in the hospital?
+
+```{r}
+breaks <- seq(from = 1, to = max(health_rec$age), by = 10) #this starts 
+#at the lowest age and ends at the lowest
+  
+age_interval <- cut(health_rec$age, breaks = breaks,
+                    right = FALSE,
+                    include.lowest = TRUE) # this makes the class interval from the list
+age_group <- cbind(data.frame(age_interval))
+
+age_groups <- sort(table(age_interval), decreasing = T) # generating frequency table
+
+barchart(age_groups,
+         horizontal = FALSE,
+         xlab = 'Age_interval',
+         ylab = 'Frequency',
+         ylim = c(0, 450),
+         col = 'red')
+```
+
+**ANSWER** Patients between the age 81 to 91 are the highest in the hospital with age 89 been the highest
+
+## Question 2
+
+which age group of patients dies more in the hospital?
+
+```{r}
+dead_patients <- health_rec[outcome == "Dead",c("outcome","age","gender") ]
+```
+
+The result shows the frequency table for dead patients according to age.
+
+```{r}
+barplot(sort(table(dead_patients$age)),
+        col = 'purple',
+        xlab = 'age (years)',
+        ylab = 'Frequency',
+        main = 'Distribution of Age for Dead Patients',
+        ylim = c(0, 30))
+```
+
+**ANSWER** Patients at age 89 are the highest to die, with 23 patients dying
+
+## Question 3:
+
+What is the most prevalent gender in the hospital
+
+```{r}
+gender <- as.data.frame(sort(table(health_rec$gender), decreasing = T)) # This gives a frequency of the genders
+  ## Female gender is more prevalent with 618 patients
+
+colnames(gender) <- c('gender','num') #changing column names
+```
+
+### Question 3b:
+
+what is the death rate of both gender
+
+```{r}
+gender_dead_count <- as.data.frame(sort(table(dead_patients$gender))) #Frequency for dead patients according to gender
+colnames(gender_dead_count) <- c('gender', 'count')
+
+gender[3] <- gender_dead_count$count
+
+names(gender)[3] <- 'dead' # this is similar to using colnames
+
+gender$rate <- gender$dead/gender$num * 100 #rate of death per hundred
+```
+
+It seems the male gender is having more dead rate than female
+
+```{r}
+barplot(gender$rate,
+        names.arg = gender$gender,
+        xlab = substitute(paste(bold('gender'))),
+        ylab = substitute(paste(bold('death rate per hundred'))),
+        main = 'Death rate of genders',
+        col = c(5,7))
+```
+
+## Question 4
+
+Gender group with the highest number of death?
+
+```{r}
+sort(table((dead_patients$gender)), decreasing = T)
+```
+
+the gender with the highest death is male with 80 individuals dead
+
+------------------------------------------------------------------------
+
+## Question 5
+
+How many patients died in the hospital with atrialfibrillation?
+
+```{r}
+dead_patients_atrial <- as.data.frame(health_rec %>% select(outcome, atrialfibrillation) %>% 
+  filter(outcome == 'Dead') %>% group_by(atrialfibrillation)%>%
+  summarize(length = length(atrialfibrillation)))
+
+dead_patients_atrial
+```
+
+67 patients died having atrialfibrillation
+
+### Question 5b
+
+patients having atrialfibrillation
+
+```{r}
+atrial <- as.data.frame(health_rec %>% select(gender, atrialfibrillation) %>% 
+  filter(atrialfibrillation == 'Having') %>% group_by(gender)%>%
+  summarize(atrial = length(atrialfibrillation))) # this gets the number of having atril... for each gender
+
+gender <- merge(gender, atrial, by = 'gender', all = T)
+```
+
+`r sum(gender$atrial)` is the number of patients having
+atrialfibrillation 
+
+### Question 5c
+Number of patients that died between the gender having atrialfibrillation 
+```{r}
+dead_patients_atrial_gender <-
+as.data.frame(health_rec %>% select(outcome, gender,
+atrialfibrillation) %>% filter(outcome == 'Dead',
+atrialfibrillation=='Having') %>% group_by(gender) %>%
+summarize(died_having_atrial = length(gender)))
+
+dead_patients_atrial_gender
+```
+39 female and 28 male died having atrialfibrillation
+
+```{r}
+gender <- merge(gender,
+dead_patients_atrial_gender, by = 'gender', all = TRUE)
+```
+merging the result to gender table
+
+################################################################################ 
+
+## Question 6
+How many patients in the hospital have depression?
+```{r}
+(sort(table(health_rec$depression)))  
+
+barplot(sort(table(health_rec$depression)),
+ylab = 'number of patients', xlab = 'depression', main = 'patients
+having depression', col = 'green')
+```
+1036 out of 1176 patients are having depression
+
+### Question 6b1
+show the total number of depressed male and female
+```{r}
+depressed_individuals <- health_rec %>% select(gender, depression)%>%
+  filter(depression == 'Having') %>% 
+  group_by(gender) %>%
+  summarize(depressed_individuals = length(depression))
+depressed_individuals
+```
+
+```{r}
+gender <- merge(gender, depressed_individuals, by = 'gender', all =
+TRUE) #merging result to gender table
+```
+#### Question 6b2
+show the number of patients having depression that are dead according to gender.
+```{r}
+dead_depressed <- as.data.frame(health_rec %>%
+                                  select(outcome, gender, depression) %>%
+                                  filter(outcome == 'Dead', depression == 'Having') %>%
+                                  group_by(gender) %>%
+                                  summarize(depressed_and_dead =length(depression)))
+dead_depressed
+```
+
+```{r}
+gender <- merge(gender, dead_depressed, by = 'gender', all =
+TRUE) # merging the result to gender table
+```
+
+```{r}
+barchart(depressed_and_dead~gender,
+         data = dead_depressed,
+         ylim = c(0,90),
+         col = 'purple') ## show data value on the chart
+```
+### Question 6c
+Show the number of dead patients having or not having depression according to the genders
+```{r}
+dep_not_dep<- as.data.frame(health_rec %>%
+                              select(outcome, gender, depression) %>%
+                              filter(outcome == 'Dead') %>%
+                              group_by(gender, depression) %>%
+                              summarize(num_of_patients = length(depression)))
+dep_not_dep
+```
+
+```{r}
+barchart(num_of_patients~depression|gender,
+         data = dep_not_dep,
+         group= depression,
+         xlab = substitute(paste(bold('Depression'))),
+         ylab = substitute(paste(bold('Number of patients'))))
+```
+
+
+
+## Question 8
+what is the rate of non-survived patients with hypertension?
+```{r}
+dead_hyper <- health_rec %>%
+  select(outcome, hypertensive) %>%
+  filter(hypertensive == 'Having', outcome == 'Dead') %>%
+  summarize(dead_hypertensive = length(hypertensive)) # this returns the patients that are dead and had hypertension
+
+hypertensive <- health_rec %>%
+  select(outcome, hypertensive) %>%
+  filter(hypertensive == 'Having') %>%
+  summarize(hypertensive = length(hypertensive)) #this returns all the patients with hypertension
+
+dead_hyper$dead_hypertensive/  hypertensive$hypertensive * 100 #proportion of the dead hypertensive patients
+```
+
+
+# Question 9
+Rate of the different gender with hypertension per 100 patients
+```{r}
+gender_hyper <- as.data.frame(health_rec %>% select(gender,
+hypertensive) %>% filter (hypertensive == 'Having') %>%
+group_by(gender) %>% summarize (hypertensive_tot =
+length(hypertensive)))
+
+gender <- merge(gender, gender_hyper, by = 'gender', all = T) #merging to gender
+gender$rate_hyper <- gender$hypertensive_tot/gender$num * 100 ##estimating the rate
+```
+
+```{r}
+gender[, c('gender','rate_hyper')]
+```
+**ANSWER** 28 female and 29 male patients per 100 are having hypertension
+
+###Question 9b
+patients having hypertension and dead
+```{r}
+dead_gender_hyper <- as.data.frame(health_rec %>%
+                                     select(outcome,gender, hypertensive)%>%
+                                     filter (outcome == 'Dead',hypertensive == 'Having') %>%
+                                     group_by(gender) %>%
+                                     summarize (hypertensive_dead = length(hypertensive))) # this separates the dead hypertensive patients according to gender
+```
+**ANSWER** 31 female and 27 male of the dead patients had hypertension
+
+```{r}
+gender <- merge(gender, dead_gender_hyper, by = 'gender', all = T)
+```
+
+## Question 10
+How many patients with renal failure are alive in the hospital?
+```{r}
+health_rec %>%
+  select(outcome, Renal_failure) %>%
+  filter(outcome == 'Alive', Renal_failure == 'Having') %>%
+  summarise(length(Renal_failure))
+```
+**ANSWER** 392 patients are having renal failure and alive
+
+### Question 10b
+How many patients died having renal failure
+```{r}
+health_rec %>%
+  select(outcome, Renal_failure) %>%
+  filter(outcome == 'Dead', Renal_failure == 'Having') %>%
+  summarise(length(Renal_failure))
+```
+**ANSWER**37 patients died having renal failure
+
+### Question 10C1
+People with renal failure according to gender
+```{r}
+renal <- as.data.frame(health_rec %>%
+     select(gender, Renal_failure)%>%
+     filter(Renal_failure == 'Having') %>%
+     group_by(gender) %>%
+     summarise(renal_failure = length(Renal_failure)))
+
+renal
+```
+
+```{r}
+gender <- merge(gender, renal, by = 'gender', all = T) #merging result to gender dataframe
+```
+
+#### 10C2
+num of patients that died having renal failure according to gender
+```{r}
+renal_dead <- as.data.frame(health_rec %>% select(outcome,
+gender,Renal_failure) %>% filter(outcome == 'Dead', Renal_failure ==
+'Having') %>% group_by(gender) %>% summarise(length(Renal_failure)))
+```
+```{r}
+gender <- merge(gender, renal_dead, by = 'gender', all = T) #merging result to gender dataframe
+```
+******************************
+
+## Question 11
+How many patients in the hospital with Hyperlipemia are dead?
+```{r}
+dead_hyperli <- as.data.frame(health_rec %>%
+                                select(outcome, gender, Hyperlipemia) %>%
+                                filter(outcome == 'Dead', Hyperlipemia == 'Having') %>%
+                                group_by(gender) %>%
+                                summarize (dead_hyperli = length(Hyperlipemia)))
+
+gender <- merge(gender, dead_hyperli, by = 'gender', all = T) # merging to gender
+```
+
+
+**ANSWER** `rsum(gender$dead_hyperli)` patients died having hyperlipermia
+
+### Question 11b
+How many patients are having hyperlipemia
+```{r}
+hyperli <- as.data.frame(health_rec %>%
+                           select(gender, Hyperlipemia) %>%
+                           filter(Hyperlipemia == 'Having') %>%
+                           group_by(gender) %>% 
+                           summarize(hyperlip = length(Hyperlipemia)))
+```
+`r sum(hyperli$hyperlip)` patients are having hyperlipermia
+
+```{r}
+gender <- merge(gender, hyperli, by = 'gender', all = T) # merging to gender
+```
+
+
+## Question 12
+how many patients in the hospital with Anemia are dead?
+
+```{r}
+anemia <- as.data.frame(health_rec %>%
+                          select(outcome, gender, deficiencyanemias) %>%
+                          filter(outcome == 'Dead', deficiencyanemias == 'Having') %>%
+                          group_by(gender) %>%
+                          summarise(anemia_dead = length(deficiencyanemias)))
+gender<- merge(gender, anemia, by = 'gender', all = T) # merging to gender 
+```
+`r sum(gender$anemia_dead)` is the sum of dead patients having anemia
+
+### Question 12b
+Total sum of patients having anemia
+
+```{r}
+anemia_tot <- as.data.frame(health_rec %>%
+        select(gender,deficiencyanemias) %>%
+        filter(deficiencyanemias == 'Having') %>%
+        group_by(gender) %>%
+        summarise(anemia_tot = length(deficiencyanemias)))
+
+gender <- merge(gender, anemia_tot, by = 'gender', all = T) #merging to gender
+```
+`r sum(gender$anemia_tot)` patients is having anemia
+
+***********************
+
+## 13
+What is the proportion of survival and non-survival between diabetic and non-diabetic patients
+
+***Short preview of the stats relating to diabetic patients***
+```{r}
+health_rec %>% select(outcome, diabetes) %>% group_by(outcome,
+diabetes) %>% summarize(count = length(diabetes))
+```
+
+### 13a1
+The proportion of patients having diabetes
+```{r}
+diabeteic <- as.data.frame(health_rec %>% 
+                             select(diabetes) %>%
+                             filter(diabetes == 'Having') %>% 
+                             summarize(length(diabetes))) # this returns the total number of diabetic patients
+
+diabeteic$`length(diabetes)`/length(health_rec$outcome) # this returns the percentage of diabetic patients
+```
+**ANSWER** 57.9% of the patients are diabetic
+
+### 13b
+Proportion of diabetic that survived
+
+To get the proportion of diabetic patient that survived, we need to know the total number of people having diabetic and we divide that by the number of people having diabetes and survived
+```{r}
+having_diabetes_alive <- as.data.frame(health_rec %>%
+   select(outcome, diabetes) %>%
+   filter(outcome == 'Alive', diabetes == 'Having') %>%
+   summarize(having_diabetes = length(diabetes))) # returns the patients having diabetes and still alive
+  
+having_diabetes <- as.data.frame(health_rec %>%
+   select(diabetes) %>%
+   filter(diabetes == 'Having') %>%
+   summarize(diabetic = length(diabetes))) # returns patients having diabetes dead or alive
+
+having_diabetes_alive$having_diabetes/having_diabetes$diabetic * 100 # proportion of diabetic patients alive
+```
+**ANSWER** 85% of diabetic patients are alive
+
+#### 13b2
+Proportion of non-diabetic that survived.
+For this we follow the same procedure as the one above but this time, the patients are not diabetic 
+```{r}
+non_diabetic_alive <- health_rec %>% 
+  select(outcome, diabetes) %>%
+  filter(outcome == 'Alive', diabetes == 'Not Having') %>%
+  summarize(non_diabetes = length(diabetes)) # this returns non-diabetic patients that are alive
+
+non_diabetic <- health_rec %>%
+  select(diabetes) %>%
+  filter(diabetes == 'Not Having') %>%
+  summarize(non_diabetic = length(diabetes)) #this returns non-diabetic dead or alive
+
+non_diabetic_alive$non_diabetes/non_diabetic$non_diabetic * 100 # this returns the proportion of non-diabetic that are alive 
+```
+**ANSWER**`r non_diabetic_alive$non_diabetes/non_diabetic$non_diabetic * 100`% of the patients are not having diabetes and are alive
+
+### 13c
+Proportion of diabetic that died
+```{r}
+dead_diabetic <- health_rec %>%
+  select(outcome, diabetes) %>%
+  filter(diabetes == 'Having', outcome == 'Dead') %>%
+  summarize (diabetic = length(diabetes)) # num of dead diabetic patients
+
+dead_diabetic$diabetic/having_diabetes$diabetic * 100 #this returns the proportion of dead diabetics 
+```
+**ANSWER** about 14.98 percent of the diabetics are dead
+
+#### 13c2
+Proportion of non_diabetic that died
+```{r}
+dead_non_diabetic <- health_rec %>% 
+  select(outcome, diabetes) %>%
+  filter(diabetes == 'Not Having', outcome == 'Dead') %>%
+  summarize (non_diabetic=length(diabetes)) # num of dead non-diabetic patients
+
+dead_non_diabetic$non_diabetic/non_diabetic$non_diabetic * 100 # this returns the proportion of dead non-diabetics
+```
+**ANSWER** 11.52 percent of non diabetics are dead.
+
+
+
+## Question 14
+What is the proportion of survival and non-survival between depressed and non-depressed patients
+
+***Short preview of the stats relating to depressed patients***
+```{r}
+health_rec %>% select(outcome, depression) %>%
+  group_by(outcome, depression) %>%
+  summarize(count = length(outcome))
+```
+
+## Question 14a
+What is the proportion of depressed and non-depressed that survived
+```{r}
+depressed <- as.data.frame(health_rec %>% 
+   select(depression) %>% 
+   filter(depression == 'Having') %>%
+   summarize(depressed = length(depression))) # this returns the total number of depressed patients either dead or alive
+
+depressed$depressed/length(health_rec$outcome) # this returns the percentage of depressed patients
+```
+**ANSWER**88.1 percent of the patients are depressed
+
+### 14a1
+Proportion of depressed patients that survived
+```{r}
+having_depression_alive <- as.data.frame(health_rec %>% 
+     select(outcome, depression) %>%
+     filter(outcome == 'Alive', depression == 'Having') %>%
+     summarize(having_depression = length(depression))) # returns the patients having depression and still alive
+
+having_depression_alive$having_depression/depressed$depressed * 100 # proportion of depressed patients alive
+```
+**ANSWER** 85.7% of depressed patients are alive
+
+#### 14a2
+Proportion of non-depressed that survived
+
+For this we follow the same procedure as the one above but this time, the patients are not depressed
+```{r}
+non_depressed_alive <- health_rec %>%
+  select(outcome, depression) %>%
+  filter(outcome == 'Alive', depression == 'Not Having') %>%
+  summarize(non_depression = length(depression)) #this returns non-depressed patients that are alive
+
+non_depressed <- health_rec %>% select(depression) %>%
+filter(depression == 'Not Having') %>% summarize(non_depressed =
+length(depression)) #this returns non-depressed patients count dead or alive
+
+non_depressed_alive$non_depression/non_depressed$non_depressed * 100 # this returns the proportion of non-depressed patients that are alive
+```
+
+**ANSWER**92.1% percent of the patients are not having depression and are alive
+
+### 14b1
+Proportion of depressed patients that died
+```{r}
+dead_depressed <-health_rec %>%
+  select(outcome, depression) %>%
+  filter(depression == 'Having', outcome == 'Dead') %>% 
+  summarize (depressed = length(depression)) # num of dead depressed patients
+
+dead_depressed$depressed/depressed$depressed * 100 #this returns the proportion of dead depressed patients
+```
+**ANSWER** about 14.28 percent of the depressed patients are dead
+
+#### 14b2
+Proportion of non_depressed patients that died
+
+```{r}
+dead_non_depressed <- health_rec %>% 
+  select(outcome, depression) %>% 
+  filter(depression== 'Not Having', outcome == 'Dead') %>% 
+  summarize(non_depressed=length(depression)) # num of dead non-diabetic patients
+
+dead_non_depressed$non_depressed/non_depressed$non_depressed * 100 # this returns the proportion of dead non-diabetics 
+```
+**ANSWER** 7.86 percent of the non-depressed patients are dead.
+
+[back to project page](Index.html)
+
+[portfolio page](https://olamideadu.com)
