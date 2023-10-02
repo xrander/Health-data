@@ -3,16 +3,15 @@ title: "Retrospective Health Data Analysis"
 author: "Olamide Adu"
 date: "2023-03-25"
 output:
-   prettydoc::html_pretty:
-    theme: 'oldstyle'
+   html_document:
     toc: true
-    toc_float: false
-    highlight: github
-    code_theme: zenburn
-    keep_md: true
-editor_options: 
-  markdown: 
-    wrap: 72
+    toc_depth: 2
+    toc_float: true
+    dev: svg
+    theme: simplex
+    highlight: zenburn
+    code_folding: show
+    df_print: paged
 ---
 
 # Health Data Anlaysis

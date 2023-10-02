@@ -3,11 +3,15 @@ title: "Readme"
 author: "Olamide Adu"
 date: "2022-11-16"
 output:
-  md_document:
-    variant: markdown_github
-editor_options: 
-  markdown: 
-    wrap: sentence
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    dev: svg
+    theme: simplex
+    highlight: zenburn
+    code_folding: show
+    df_print: paged
 ---
 
 # Retrospective Health-data Analysis
@@ -78,8 +82,7 @@ The MIMIC-III database is publicly a available critical care database containing
 -   EF: Ejection Fraction: Used to gauge how healthy the heart is. It is the amount of blood that the heart pumps each time it beats.
 
 ## Questions
-![](https://i.pinimg.com/originals/0e/53/94/0e53948c0d24283e7cdd42f9bb0bda4e.jpg)
-*imagesource: pinterest*
+
 Based on the data available the following questions will be answered - Which age group is the most in the hospital?
 - which age group of patients dies more in the hospital?
 - which gender is the most prevalent in the hospital?
