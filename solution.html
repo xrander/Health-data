@@ -3380,7 +3380,6 @@ gender</p>
 <span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a>gender,Renal_failure) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(outcome <span class="sc">==</span> <span class="st">&#39;Dead&#39;</span>, Renal_failure <span class="sc">==</span></span>
 <span id="cb55-3"><a href="#cb55-3" tabindex="-1"></a><span class="st">&#39;Having&#39;</span>) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(gender) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="fu">length</span>(Renal_failure)))</span></code></pre></div>
 <div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a>gender <span class="ot">&lt;-</span> <span class="fu">merge</span>(gender, renal_dead, <span class="at">by =</span> <span class="st">&#39;gender&#39;</span>, <span class="at">all =</span> T) <span class="co">#merging result to gender dataframe</span></span></code></pre></div>
-<hr />
 </div>
 </div>
 </div>

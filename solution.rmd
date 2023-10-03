@@ -436,7 +436,7 @@ gender,Renal_failure) %>% filter(outcome == 'Dead', Renal_failure ==
 ```{r}
 gender <- merge(gender, renal_dead, by = 'gender', all = T) #merging result to gender dataframe
 ```
-******************************
+
 
 ## Question 11
 How many patients in the hospital with Hyperlipemia are dead?
