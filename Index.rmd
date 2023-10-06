@@ -243,22 +243,26 @@ We can expect two categories of data type according to the data description. The
 The descriptive statistics also shows the min and max age as `r min(health_rec$age)` and `r max(health_rec$age)`.
 
 ```{r}
-health_rec_cleaned <- health_rec %>%
+health_rec <- health_rec %>%
   mutate(outcome = factor(outcome, levels = c(0,1), labels = c("Alive", "Dead")),
          gender = factor(gender, levels = c(1, 2), labels = c("Male", "Female")),
          hypertensive = factor(hypertensive, levels = c(0,1), labels = c("Having", "Not having")),
          atrialfibrillation = factor(atrialfibrillation, levels = c(0,1), labels = c("Having", "Not having")),
-         chd_with_no_MI = factor(CHD_with_no_MI, levels = c(0,1), labels = c("Having", "Not Having")),
+         CHD_with_no_MI = factor(CHD_with_no_MI, levels = c(0,1), labels = c("Having", "Not Having")),
          diabetes = factor(diabetes, levels = c(0,1), labels = c("Having", "Not Having")),
-         depression = factor(diabetes, levels = c(0,1), labels = c("Having", "Not Having")),
-         hyperlipemia = factor(Hyperlipemia, levels = c(0,1), labels = c("Having", "Not Having")),
-         renal_failure = factor(Renal_failure, levels = c(0,1), labels = c("Not Having", "Having")),
-         copd = factor(COPD, levels = c(0,1), labels = c(" Not Having", "Having")),
-         )
+         depression = factor(depression, levels = c(0,1), labels = c("Having", "Not Having")),
+         Hyperlipemia = factor(Hyperlipemia, levels = c(0,1), labels = c("Having", "Not Having")),
+         Renal_failure = factor(Renal_failure, levels = c(0,1), labels = c("Not Having", "Having")),
+         COPD = factor(COPD, levels = c(0,1), labels = c(" Not Having", "Having")))
 ```
 
 ### Missing values
-Next, we investigate the data for missing values
+Next, we investigate the data for missing values. It is alright to have some missing values as regards some variables, but the outcome should be known. Outcome will be used to handle the missing data
+```{r}
+health_rec2%>%
+  filter(!is.na(outcome))
+```
+
 
 ## Dealing with NA's for outcome
 
