@@ -269,23 +269,31 @@ To know the age(not age group) that is most occurring, we can simply group by th
 health_rec %>%
   group_by(age) %>%
   summarize(frequency = n()) %>%
-  slice_max(order_by = frequency, n = 5)
+  slice_max(order_by = frequency, n = 3)
 ```
 
 ## Question 2
+which age_group of the different gender died the most from data collected?
 
-which age group of patients dies more in the hospital?
-
-```{r}
+```{r message=FALSE}
 #dead_patients <- health_rec[outcome == 1,c("outcome","age","gender") ]
 
 health_rec %>%
   mutate(outcome = ifelse(outcome == 0, "alive", "dead")) %>%
-  group_by(factor(age), gender) %>%
-  summarize(dead_patients = length(outcome))
+  group_by(gender, age_group) %>%
+  summarize(dead_patients = length(outcome)) %>%
+  arrange(desc(dead_patients)) %>%
+  ggplot(aes(age_group, dead_patients, fill = gender)) +
+  geom_col(position = "dodge")+
+  scale_fill_manual(values = c("tomato2", "thistle4"))+
+  labs(x = "Age group",
+       y = "Dead patients",
+       fill = "Gender",
+       title = "Dead counts across the different gender")+
+  theme_bw()
 ```
 
-The result shows the frequency table for dead patients according to age.
+The result shows the frequency table for dead patients according to age group and gender. The female 
 
 ```{r}
 barplot(sort(table(dead_patients$age)),
