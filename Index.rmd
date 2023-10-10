@@ -18,26 +18,19 @@ editor_options:
 ---
 
 # Retrospective Health-data Analysis
+Retrospective exploratory data analysis of intensive care unit health-data downloaded from kaggle.com already preprocessed by user @saurabhshahane.
 
-Retrospective exploratory data analysis of intensive care unit
-health-data downloaded from kaggle.com already preprocessed by user
-@saurabhshahane.
+**NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1).
 
-**NB**: The
-[data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction)
-used is part of a whole data from [**MIMIC III original
-database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1).
-Data usage is mainly for exploratory data, improving analytical skills
-using some analytics tools. Mainly
+Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly
 ![R](https://raw.githubusercontent.com/xrander/Health-data/master/Resource/4375063_logo_project_r_icon.png)
 and
 ![](https://github.com/xrander/Health-data/raw/master/Resource/4691328_postgresql_icon.png)
 
 ## The Data
+We load the libraries for reading and analyzing the data first.
 
-We loaded the libraries for reading and analyzing the data.
-
-```{r load_libraries, message=FALSE}
+```{r load_libraries, message=FALSE, results='hide'}
 # Load the doBy library for advanced data manipulation and data aggregation
 library('doBy')
 
@@ -45,23 +38,22 @@ library('doBy')
 library('tidyverse')
 
 # Load the lattice library for advanced graphical presentation
-library(lattice)
+library('lattice')
 ```
+Next we import the data.frame
 
-Next we import the dataframe
-
-```{r read_data, message = FALSE, cols.print = 15}
+```{r load_data, message = FALSE, cols.print = 15}
+# Import the data
 health_rec <- read_csv('https://raw.githubusercontent.com/xrander/Health-data/master/Health_data.csv')
 
+# Preview the first ten rows of the data
 head(health_rec, n = 10)
 ```
 
 # Description of the Data
 
-The MIMIC-III database is publicly a available critical care database
-containing de-identified data on 46520 patients and 58976 admissions to
-the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
-2001 and 2008.
+The MIMIC-III database is publicly a available critical care database containing de-identified data on 46520 patients and 58976 admissions to the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
+2001 and 2008. The data used for this study is limited to a bit more than 1000 patient only.
 ![](https://news.mit.edu/sites/default/files/images/202207/MIT-Healthcare-Technology-01.jpg)
 
 ## Data Definition
@@ -82,8 +74,7 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   atrialfibrillation: 0 = with and 1 = without
 
--   CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0
-    = with and 1 without
+-   CHD_with_no_MI: Coronary heart disease with Myocardial infarction, 0 = with and 1 without
 
 -   diabetes: 0 = with and 1 without
 
@@ -91,32 +82,23 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   depression: 0 = with and 1 = without
 
--   Hyperlipemia:this refers to high concentration of fats or lipids in
-    the blood. 0 = with and 1 = without
+-   Hyperlipemia:this refers to high concentration of fats or lipids in the blood. 0 = with and 1 = without
 
 -   Renal_failure: 0 = without renal failure and 1 = with renal failure
 
--   COPD: chronic obstructive pulmonary disease(A disease causing
-    airflow blockage and breathing related problems). 0 = without and 1
-    = without
+-   COPD: chronic obstructive pulmonary disease(A disease causing airflow blockage and breathing related problems). 0 = without and 1 = without
 
 -   heart_rate: a range of 60 to 100 bpm is considered normal
 
--   Systolic_blood_pressure: measure of the pressure in arteries when
-    the heart beats.
+-   Systolic_blood_pressure: measure of the pressure in arteries when the heart beats.
 
--   Diastolic_blood_pressure: measure of the pressure in the arteries
-    when the heart rests between beats
+-   Diastolic_blood_pressure: measure of the pressure in the arteries when the heart rests between beats
 
--   Respiratory_rate: this is the number of breathes per minute. The
-    normal range is between 12-20, anything under above or below this
-    range is abnormal. 25 is considered too high.
+-   Respiratory_rate: this is the number of breathes per minute. The normal range is between 12-20, anything under above or below this range is abnormal. 25 is considered too high.
 
 -   temperature
 
--   SP_O2: Oxygen saturation (measure of how much oxygen the blood
-    carries as a percentage of the maximum it could carry). The normal
-    range for healthy individuals is between 96% to 99%
+-   SP_O2: Oxygen saturation (measure of how much oxygen the blood carries as a percentage of the maximum it could carry). The normal range for healthy individuals is between 96% to 99%
 
 -   Urine_output
 
@@ -124,17 +106,13 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   RBC: acronym for Red Blood Count.
 
--   MCH: Mean Corpuscular Hemoglobin, this is the average amount of
-    hemoglobin in each of the red blood cells
+-   MCH: Mean Corpuscular Hemoglobin, this is the average amount of hemoglobin in each of the red blood cells
 
--   MCHC: Mean Cell Hemoglobin Concentration, this is the average
-    concentration of hemoglobin in a given volume of blood.
+-   MCHC: Mean Cell Hemoglobin Concentration, this is the average concentration of hemoglobin in a given volume of blood.
 
--   MCV: Mean Corpuscular Volume, this is the measure of the average
-    size of the red clood cells
+-   MCV: Mean Corpuscular Volume, this is the measure of the average size of the red clood cells
 
--   RDW: red cell distribution width. it is the differences in the
-    volume and size of the red blood cells
+-   RDW: red cell distribution width. it is the differences in the volume and size of the red blood cells
 
 -   Leucocyte
 
@@ -146,8 +124,7 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   Lymphocyte
 
--   PT: measure of the time it takes the liquid portion of the blood to
-    clot.
+-   PT: measure of the time it takes the liquid portion of the blood to clot.
 
 -   INR
 
@@ -169,8 +146,7 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   Chloride
 
--   Anion_gap: measures the difference between the negatively and
-    positively charged electrolytes in the blood.
+-   Anion_gap: measures the difference between the negatively and positively charged electrolytes in the blood.
 
 -   Magnesium_ion
 
@@ -180,11 +156,9 @@ the ICU of the Beth Israel Deaconess Medical Center, Boston, USA between
 
 -   Lactic_acid
 
--   PCO2: Partial Pressure of Carbon Dioxide, this measures the
-    carbondioxide within the arterial or venous blood.
+-   PCO2: Partial Pressure of Carbon Dioxide, this measures the carbondioxide within the arterial or venous blood.
 
--   EF: Ejection Fraction: Used to gauge how healthy the heart is. It is
-    the amount of blood that the heart pumps each time it beats.
+-   EF: Ejection Fraction: Used to gauge how healthy the heart is. It is the amount of blood that the heart pumps each time it beats.
 
 # Questions
 
@@ -208,41 +182,42 @@ Based on the data available the following questions will be answered:
 
 9.   How many patients with renal failure are alive in the hospital?
 
-10.   how many patients in the hospital with Hperlipemia are dead?
+10.   how many patients in the hospital with Hyperlipemia are dead?
 
 11.   how many patients in the hospital with Anemia are dead?
 
-12.   What is the proportion of survival and non-survival between diabetic
-    and non-diabetic patients
+12.   What is the proportion of survival and non-survival between diabetic and non-diabetic patients
 
-13.  What is the proportion of survival and non-survival between
-    depressed and non-depressed patients
+13.  What is the proportion of survival and non-survival between depressed and non-depressed patients
 
-# Solution
+# Data Preparation and Preprocessing
 
 > **Note:** The PostgreSQL code solution to the question asked are
 > [here](https://raw.githubusercontent.com/xrander/Health-data/master/Health_data_analysis.sql)
 
 ##Understanding the Data
-It is important we understand the
+It is important we understand the data
 
 ### The Data Structure
-```{r data_structure,message=FALSE, results='hide'}
-str(health_rec) # data structure
+```{r data_structure,message=FALSE}
+# data structure
+str(health_rec) 
 ```
-At first glance, all the variables are numeric type (not shown here, due to the length). There are `r dim(health_rec)[1]` observations and `r dim(health_rec)[2]` variables. Some of the variables of the data does not follow the data definition. A quick descriptive summary of the data shows this.
+At first glance, all the variables are numeric type. There are `r dim(health_rec)[1]` observations and `r dim(health_rec)[2]` variables. Some of the variables of the data does not follow the data definition. A quick descriptive summary of the data shows this.
 
 **Descriptive**
-```{r results='hide'}
-summary(health_rec) # quick statistics
+```{r data_stats}
+# quick descriptive statistics of the data
+summary(health_rec)
 ```
 
 ### Data transformation
 We can expect two categories of data type according to the data description. The first is categorical variables for data which min is 0 and max is 1, and the other is numeric variables. We deal with data that are having the wrong structure, i.e. type, and also assigns labels to the categorical variables.
 
-The descriptive statistics also shows the min and max age as `r min(health_rec$age)` and `r max(health_rec$age)`.
+The descriptive statistics also shows the min and max age as `r min(health_rec$age)` and `r max(health_rec$age)`. 
 
 ```{r}
+# Change the categorical variables to factor data type
 health_rec <- health_rec %>%
   mutate(outcome = factor(outcome, levels = c(0,1), labels = c("Alive", "Dead")),
          gender = factor(gender, levels = c(1, 2), labels = c("Male", "Female")),
@@ -257,75 +232,45 @@ health_rec <- health_rec %>%
 ```
 
 ### Missing values
-Next, we investigate the data for missing values. It is alright to have some missing values as regards some variables, but the outcome should be known. Outcome will be used to handle the missing data
+Next, we investigate the data for missing values. It is alright to have some missing values for some variables, but the outcome should be known, as it is important to see if patients are dead or alive. Outcome will be used to handle the missing data.
 ```{r}
-health_rec2%>%
+# Remove missing data from the outcome variable
+health_rec <- health_rec%>%
   filter(!is.na(outcome))
 ```
 
+There is no missing data again in the outcome of patients. The data have been reduced from 1177 to `dim(health_rec)[1]`.
 
-## Dealing with NA's for outcome
+# Data Analysis and Solution to Questions
+A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
 
-Some of the data is having NA, that happens in big data, outcome is the
-most important here and cannot be left as NA
+## Descriptive Statistics
+### Age
+**The age group with the highest frequency**: To do this, we have to bin the age variable, creating a class range, then we can create a summary of the age_group and see their frequency
+```{r age_group_frequency}
+# Create bins
+age_categories <- seq(0, 120, by = 20) # We assume the highest age is not above 120 years old
+
+# Create age interval variable
+health_rec <- health_rec %>%
+  mutate(age_group = cut(age,
+                         breaks = age_categories,
+                         include.lowest = T, # To indicate if x is the lowest
+                         ordered_result = F)) #This ensures that the factor variable is not ordered
+
+health_rec %>%
+  group_by(age_group) %>%
+  summarize(frequency = n())
+```
+Older people are the highest in the hospital, with people between 60 - 80 years old having being the highest in the clinic and people more than 80 years old being the next most occurring patients.
+To know the age(not age group) that is most occurring, we can simply group by the age them.
 
 ```{r}
-health_rec[is.na(health_rec$outcome),]
-
-health_rec <- health_rec[!is.na(health_rec$outcome),] #removing the missing outcome data
-
-length(health_rec$outcome) 
+health_rec %>%
+  group_by(age) %>%
+  summarize(frequency = n()) %>%
+  slice_max(order_by = frequency, n = 5)
 ```
-
-There is no missing data again in the part of the outcome. -- The data
-have reduced to 1176 from 1177
-
-
-## Question 1: Which age is the most in the hospital?
-
-```{r}
-sort(table(health_rec$age), decreasing = T)
-# Visuals
-barplot(sort(table(health_rec$age), decreasing = T),
-        col = 'blue',
-        main = 'Age distribution of patients',
-        ylim = c(0, 160),
-        ylab = 'Number of patients',
-        xlab = 'Age of Patients')
-```
-
-Patients that are **89 years** of age are the highest.
-
-### Question 1b: Which age group is the most in the hospital?
-
-```{r}
-breaks <- seq(from = 0, to = 100, by = 20) #this starts 
-#at the lowest age and ends at the lowest
-  
-age_interval <- cut(health_rec$age, breaks = breaks,
-                    right = TRUE,
-                    include.lowest = TRUE,
-                    ordered_result = TRUE) # this makes the class interval from the list
-
-unique(age_interval)
-```
-
-
-```{r}
-age_group <- cbind(data.frame(age_interval))
-
-age_groups <- sort(table(age_interval), decreasing = T) # generating frequency table
-
-barchart(age_groups,
-         horizontal = FALSE,
-         xlab = 'Age_interval',
-         ylab = 'Frequency',
-         ylim = c(0, 450),
-         col = 'red')
-```
-
-**ANSWER** Patients between the age 81 to 91 are the highest in the
-hospital with age 89 been the highest
 
 ## Question 2
 
