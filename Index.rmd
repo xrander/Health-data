@@ -1,5 +1,5 @@
 ---
-title: "Retrospective Health Data Analysis"
+title: "Predicting Health Outcome"
 author: "Olamide Adu"
 date: "2023-03-25"
 output:
@@ -22,7 +22,7 @@ Retrospective exploratory data analysis of intensive care unit health-data downl
 
 **NB**: The [data](https://www.kaggle.com/datasets/saurabhshahane/in-hospital-mortality-prediction) used is part of a whole data from [**MIMIC III original database**](https://www.kaggle.com/datasets/drscarlat/mimic2-original-icu/download?datasetVersionNumber=1).
 
-Data usage is mainly for exploratory data, improving analytical skills using some analytics tools. Mainly
+Mainly
 ![R](https://raw.githubusercontent.com/xrander/Health-data/master/Resource/4375063_logo_project_r_icon.png)
 and
 ![](https://github.com/xrander/Health-data/raw/master/Resource/4691328_postgresql_icon.png)
@@ -240,6 +240,14 @@ health_rec <- health_rec%>%
 ```
 
 There is no missing data again in the outcome of patients. The data have been reduced from 1177 to `dim(health_rec)[1]`.
+To deal with missing values from the other variables other than outcome, we need to know the missing value for the categorical and numeric variable and take the necessary steps.
+```{r}
+categorical <- health_rec %>%
+  select(gender, hypertensive:COPD)
+
+unique(is.na(categorical))
+```
+The categorical variables do not have missing values.
 
 # Data Analysis and Solution to Questions
 A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
@@ -293,66 +301,32 @@ health_rec %>%
   theme_bw()
 ```
 
-The result shows the frequency table for dead patients according to age group and gender. The female 
+The result shows the frequency table for dead patients according to age group and gender. The age group 60 to 80 years have the count for both genders.
 
-```{r}
-barplot(sort(table(dead_patients$age)),
-        col = 'purple',
-        xlab = 'age (years)',
-        ylab = 'Frequency',
-        main = 'Distribution of Age for Dead Patients',
-        ylim = c(0, 30))
-```
-
-**ANSWER** Patients at age 89 are the highest to die, with 23 patients
-dying
-
-## Question 3:
-
+## Question 3
 What is the most prevalent gender in the hospital
-
 ```{r}
-gender <- as.data.frame(sort(table(health_rec$gender), decreasing = T)) # This gives a frequency of the genders
-  ## Female gender is more prevalent with 618 patients
-
-colnames(gender) <- c('gender','num') #changing column names
+health_rec %>%
+  select(gender) %>%
+  group_by(gender) %>%
+  count()
 ```
+Female have the larger population in the clinic.
 
 ### Question 3b:
-
 what is the death rate of both gender
 
 ```{r}
-gender_dead_count <- as.data.frame(sort(table(dead_patients$gender))) #Frequency for dead patients according to gender
-colnames(gender_dead_count) <- c('gender', 'count')
-
-gender[3] <- gender_dead_count$count
-
-names(gender)[3] <- 'dead' # this is similar to using colnames
-
-gender$rate <- gender$dead/gender$num * 100 #rate of death per hundred
+health_rec %>%
+  group_by(gender, outcome) %>%
+  count() %>%
+  pivot_wider(names_from = outcome,
+              values_from = n) %>%
+  mutate(total = sum(Alive, Dead),
+         death_per_100 = Dead/100,
+         death_ratio = round(Dead/total, 2))
 ```
-
-It seems the male gender is having more dead rate than female
-
-```{r}
-barplot(gender$rate,
-        names.arg = gender$gender,
-        xlab = substitute(paste(bold('gender'))),
-        ylab = substitute(paste(bold('death rate per hundred'))),
-        main = 'Death rate of genders',
-        col = c(5,7))
-```
-
-## Question 4
-
-Gender group with the highest number of death?
-
-```{r}
-sort(table((dead_patients$gender)), decreasing = T)
-```
-
-the gender with the highest death is male with 80 individuals dead
+The male gender have higher number of death.
 
 ------------------------------------------------------------------------
 
