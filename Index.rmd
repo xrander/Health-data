@@ -39,6 +39,9 @@ library('tidyverse')
 
 # Load the lattice library for advanced graphical presentation
 library('lattice')
+
+# Load Hmisc to impute missing values
+library("e1071")
 ```
 Next we import the data.frame
 
@@ -252,60 +255,31 @@ The categorical variables do not have missing values.
 For the numerical variable, the descriptive statistics carried out earlier shows that some numerical variables contains missing values
 ```{r numerical_variables}
 numerical <- health_rec %>%
-  select(-colnames(categorical), -c(1:4, 52))
+  select(-colnames(categorical), -c(1:4))
 
 str(numerical)
 ```
-We are going to impute the missing values in the numerical variables using their mean.
+We are going to impute the missing values in the numerical variables using their mean. We use the e1071 package impute function here.
 
 ```{r}
-# Create functions to find mean removing the NA's
-mean_without_na <- function(x){
-  mean(x, na.rm = T)
-}
-
-# Pass the function to an apply statement to get individual column mean
-num_val_means <- lapply(numerical, FUN = mean_without_na)
+imputed_means <- numerical %>%
+  impute(what = "mean")
 ```
 
+Next we replace the old values with new ones in the main data frame.
 ```{r}
-impute_mean <- function(x,y){
-  ifelse(is.na(x), num_val_means[[y]], x)
-}
+health_rec_clean <- health_rec %>%
+  select(-c(names(numerical))) %>%
+  bind_cols(imputed_means)
 ```
 
+Now we check for missing values to confirm
 ```{r}
-health_rec %>%
-  mutate(BMI = impute_mean(BMI, 1),
-         heart_rate = impute_mean(heart_rate, 2),
-         Systolic_blood_pressure = impute_mean(Systolic_blood_pressure, 3),
-         Diastolic_blood_pressure = impute_mean(Diastolic_blood_pressure, 4),
-         Respiratory_rate = impute_mean(Respiratory_rate, 5),
-         temperature = impute_mean(temperature, 6),
-         SP_02 = impute_mean(SP_02, 7),
-         Urine_output = impute_mean(Urine_output, 8),
-         hematocrit = impute_mean(hematocrit, 9),
-         RBC = impute_mean(RBC, 10))
+unique(is.na(health_rec_clean))
 ```
+All numerical variable missing values are replaced by their means.
 
-```{r}
-impute_means <- function(data, columns_to_impute) {
-  for (i in 1:length(columns_to_impute)) {
-    col_name <- columns_to_impute[i]
-    data <- data %>%
-      mutate(!!col_name := impute_mean(!!sym(col_name), i))
-  }
-  return(data)
-}
-
-for (i in 1:length(columns_to_impute)){
-  col_name <- columns_to_impute[i]
-  health_Rec <- health_rec %>%
-    mutate(!!col_name := impute_mean(!!sym(col_name), i))
-}
-```
-
-# Data Analysis and Solution to Questions
+# Exploratory Data Analysis
 A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
 
 ## Descriptive Statistics
@@ -316,21 +290,29 @@ A majority of the question asked are descriptive statistics questions and answer
 age_categories <- seq(0, 120, by = 20) # We assume the highest age is not above 120 years old
 
 # Create age interval variable
-health_rec <- health_rec %>%
+health_rec_clean <- health_rec_clean %>%
   mutate(age_group = cut(age,
                          breaks = age_categories,
                          include.lowest = T, # To indicate if x is the lowest
                          ordered_result = F)) #This ensures that the factor variable is not ordered
 
-health_rec %>%
+
+
+health_rec_clean %>%
   group_by(age_group) %>%
   summarize(frequency = n())
 ```
+```{r}
+health_rec_clean %>%
+  mutate(age_group = str_remove(age_group, '/(')) %>%
+  count()
+```
+
 Older people are the highest in the hospital, with people between 60 - 80 years old having being the highest in the clinic and people more than 80 years old being the next most occurring patients.
 To know the age(not age group) that is most occurring, we can simply group by the age them.
 
 ```{r}
-health_rec %>%
+health_rec_clean %>%
   group_by(age) %>%
   summarize(frequency = n()) %>%
   slice_max(order_by = frequency, n = 3)
@@ -340,10 +322,8 @@ health_rec %>%
 which age_group of the different gender died the most from data collected?
 
 ```{r message=FALSE}
-#dead_patients <- health_rec[outcome == 1,c("outcome","age","gender") ]
 
-health_rec %>%
-  mutate(outcome = ifelse(outcome == 0, "alive", "dead")) %>%
+health_rec_clean %>%
   group_by(gender, age_group) %>%
   summarize(dead_patients = length(outcome)) %>%
   arrange(desc(dead_patients)) %>%
