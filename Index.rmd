@@ -233,21 +233,77 @@ health_rec <- health_rec %>%
 
 ### Missing values
 Next, we investigate the data for missing values. It is alright to have some missing values for some variables, but the outcome should be known, as it is important to see if patients are dead or alive. Outcome will be used to handle the missing data.
-```{r}
+```{r remove_na}
 # Remove missing data from the outcome variable
 health_rec <- health_rec%>%
   filter(!is.na(outcome))
 ```
 
-There is no missing data again in the outcome of patients. The data have been reduced from 1177 to `dim(health_rec)[1]`.
+There is no missing data present in the outcome of patients. The data have been reduced from 1177 to `dim(health_rec)[1]`.
 To deal with missing values from the other variables other than outcome, we need to know the missing value for the categorical and numeric variable and take the necessary steps.
-```{r}
+```{r categorical_variables}
 categorical <- health_rec %>%
   select(gender, hypertensive:COPD)
 
 unique(is.na(categorical))
 ```
 The categorical variables do not have missing values.
+
+For the numerical variable, the descriptive statistics carried out earlier shows that some numerical variables contains missing values
+```{r numerical_variables}
+numerical <- health_rec %>%
+  select(-colnames(categorical), -c(1:4, 52))
+
+str(numerical)
+```
+We are going to impute the missing values in the numerical variables using their mean.
+
+```{r}
+# Create functions to find mean removing the NA's
+mean_without_na <- function(x){
+  mean(x, na.rm = T)
+}
+
+# Pass the function to an apply statement to get individual column mean
+num_val_means <- lapply(numerical, FUN = mean_without_na)
+```
+
+```{r}
+impute_mean <- function(x,y){
+  ifelse(is.na(x), num_val_means[[y]], x)
+}
+```
+
+```{r}
+health_rec %>%
+  mutate(BMI = impute_mean(BMI, 1),
+         heart_rate = impute_mean(heart_rate, 2),
+         Systolic_blood_pressure = impute_mean(Systolic_blood_pressure, 3),
+         Diastolic_blood_pressure = impute_mean(Diastolic_blood_pressure, 4),
+         Respiratory_rate = impute_mean(Respiratory_rate, 5),
+         temperature = impute_mean(temperature, 6),
+         SP_02 = impute_mean(SP_02, 7),
+         Urine_output = impute_mean(Urine_output, 8),
+         hematocrit = impute_mean(hematocrit, 9),
+         RBC = impute_mean(RBC, 10))
+```
+
+```{r}
+impute_means <- function(data, columns_to_impute) {
+  for (i in 1:length(columns_to_impute)) {
+    col_name <- columns_to_impute[i]
+    data <- data %>%
+      mutate(!!col_name := impute_mean(!!sym(col_name), i))
+  }
+  return(data)
+}
+
+for (i in 1:length(columns_to_impute)){
+  col_name <- columns_to_impute[i]
+  health_Rec <- health_rec %>%
+    mutate(!!col_name := impute_mean(!!sym(col_name), i))
+}
+```
 
 # Data Analysis and Solution to Questions
 A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
