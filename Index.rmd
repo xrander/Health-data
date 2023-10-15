@@ -249,6 +249,20 @@ imputed_means <- numerical %>%
   impute(what = "mean")
 ```
 
+### Numerical Variables distribution
+The new data will be tidied to visualize the distribution of the numerical variables.
+```{r}
+as.tibble(imputed_means) %>%
+  pivot_longer(cols = everything(),
+               names_to = "variable",
+               values_to = "value") %>%
+  ggplot(show.legend = F)+
+  geom_density(aes(value), col = "blue")+
+  facet_wrap(~variable, scales = "free")+
+  theme_minimal()
+```
+
+
 Next we replace the old values with new ones in the main data frame. In the process, the group_num and ID column were also removed.
 ```{r}
 health_rec_clean <- health_rec %>%
@@ -391,6 +405,31 @@ ggplot(melt(correlation_plot), aes(Var1, Var2, fill = value, label = round(value
   labs(title = "Correlation plot of variables")+
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Patient Outcome Prediction
+## Machine Learning Algorithms to be used
+We are going to predict the outcome of any one patients making use of four machine learning algorithms viz:
+
+- Logistic Regression
+
+- Random Forest Classifier
+
+- Support Vector Machines (SVMs)
+
+- Gradient Boosting Algorithms (XGboosts)
+
+The models will be evaluated using:
+
+- ROC curve
+
+- Confusion Matrix
+
+- Precision scores
+While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
+
+```{r}
+
 ```
 
 
