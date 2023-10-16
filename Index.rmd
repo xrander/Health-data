@@ -429,7 +429,7 @@ The models will be evaluated using:
 While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
 
 ```{r}
-
+set.seed(1599) # Set seed to ensure reproducibility
 ```
 
 
