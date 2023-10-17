@@ -42,6 +42,9 @@ library('corrplot')
 
 # Load Hmisc to impute missing values
 library("e1071")
+
+# For data sampling for training and testing
+library('rsample')
 ```
 Next we import the data.frame
 
@@ -198,7 +201,11 @@ Based on the data available the following questions will be answered:
 > **Note:** The PostgreSQL code solution to the descriptive statistic questions asked are
 > [here](https://raw.githubusercontent.com/xrander/Health-data/master/Health_data_analysis.sql)
 
+## Explanatory Variable and Dependent Variable
+The dependent variable for this analysis is the outcome, while other variables are the explanatory variable.
+
 ##Understanding the Data
+
 It is important we understand the data
 
 ### The Data Structure
@@ -213,7 +220,7 @@ At first glance, all the variables are numeric type. There are `r dim(health_rec
 summary(health_rec)
 ```
 
-We can expect two categories of data type according to the data description. The first is categorical variables for data which min is 0 and max is 1, and the other is numeric variables.
+We can expect two data type according to the data description. The first is categorical variables for data which min is 0 and max is 1, and the other is numeric variables.
 
 The descriptive statistics also shows the min and max age as `r min(health_rec$age)` and `r max(health_rec$age)`.
 
@@ -252,14 +259,14 @@ imputed_means <- numerical %>%
 ### Numerical Variables distribution
 The new data will be tidied to visualize the distribution of the numerical variables.
 ```{r}
-as.tibble(imputed_means) %>%
+as_tibble(imputed_means) %>%
   pivot_longer(cols = everything(),
                names_to = "variable",
                values_to = "value") %>%
   ggplot(show.legend = F)+
-  geom_density(aes(value), col = "blue")+
+  geom_density(aes(value), col = "tomato2")+
   facet_wrap(~variable, scales = "free")+
-  theme_minimal()
+  theme_bw()
 ```
 
 
@@ -430,6 +437,8 @@ While these are used, Regression related metrics such as MAE, MSE, RMSE and R-sq
 
 ```{r}
 set.seed(1599) # Set seed to ensure reproducibility
+
+initial_split()
 ```
 
 
