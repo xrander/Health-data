@@ -34,6 +34,8 @@ We load the libraries for reading and analyzing the data first.
 # Load the doBy library for advanced data manipulation and data aggregation
 library('doBy')
 
+library("reshape2")
+
 # Load the tidyverse library for data manipulation and visualization
 library('tidyverse')
 
@@ -45,6 +47,11 @@ library("e1071")
 
 # For data sampling for training and testing
 library('rsample')
+
+# Random Forest
+library("randomForest")
+
+library("rpart")
 ```
 Next we import the data.frame
 
@@ -273,8 +280,12 @@ as_tibble(imputed_means) %>%
 Next we replace the old values with new ones in the main data frame. In the process, the group_num and ID column were also removed.
 ```{r}
 health_rec_clean <- health_rec %>%
-  select(-c(1,2),-c(names(numerical))) %>%
-  bind_cols(imputed_means)
+  select(-c(1,2),-c(names(numerical))) %>% # remove unwanted variables and old numerical variables
+  bind_cols(imputed_means) %>% # add imputed values columns to the data frame
+  mutate(id = row_number()) %>% # add row numbers to the data frame
+  select(id, everything()) # rearrange variables to make id come first
+
+tail(health_rec_clean, 10)
 ```
 
 Now we check to find if there are still missing values.
@@ -287,9 +298,9 @@ All numerical variable missing values are replaced by their means.
 A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
 
 ## Descriptive Statistics
-### Age
+### Age Distribution According to Groups
 **The age group with the highest frequency**: To do this, we have to bin the age variable, creating a class range, then we can create a summary of the age_group and see their frequency
-```{r age_group_frequency}
+```{r age_group_class_interval}
 # Create bins
 age_categories <- seq(0, 120, by = 20) # We assume the highest age is not above 120 years old
 
@@ -303,23 +314,42 @@ health_rec_clean <- health_rec_clean %>%
                              ifelse(age_group == "(20,40]", "20-40",
                                     ifelse(age_group == "(40,60]", "40-60",
                                            ifelse(age_group == "(60,80]", "60-80", "80-100")))), # Change the group names to ensure consistency
-         age_group = factor(age_group, levels = c("0-20", "20-40","40-60", "60-80", "80-100"))) 
+         age_group = factor(age_group, levels = c("0-20", "20-40","40-60", "60-80", "80-100")))
+```
 
 
-
+```{r age_group_frequency visualization}
 health_rec_clean %>%
   group_by(age_group) %>%
-  summarize(frequency = n())
+  summarize(frequency = n()) %>%
+  ggplot(aes("", frequency, fill = age_group))+
+  geom_col(color = "white")+
+  geom_text(aes(label = paste0(round(frequency/sum(frequency)*100, 1), "%")),
+              position = position_stack(vjust = 0.5))+
+  scale_fill_manual(values = c("pink", "coral", "tomato1", "orangered1", "indianred1"))+
+  labs(x = NULL,
+       y = NULL,
+       fill = "Age Group",
+       title = "Pie Chart of Age Groups")+
+  coord_polar(theta = "y", start = 0)+
+  theme(legend.position = "top",
+        axis.line = element_blank(),
+        plot.background = element_blank(),
+        rect = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank())
 ```
 
 Older people are the highest in the hospital, with people between 60 - 80 years old having being the highest in the clinic and people more than 80 years old being the next most occurring patients.
 To know the age(not age group) that is most occurring, we can simply group by the age them.
 
-```{r}
+```{r message=FALSE}
 health_rec_clean %>%
   group_by(age) %>%
   summarize(frequency = n()) %>%
-  slice_max(order_by = frequency, n = 3)
+  arrange(desc(frequency)) %>%
+  top_n(n = 6)
 ```
 The highest count of patients in the clinic are aged 89, 84 and 81 years respectively.
 
@@ -404,9 +434,9 @@ dead_patients_tidy %>%
 ```{r}
 correlation_plot <- cor(health_rec_clean[,c(1:2, 13:49)])
 
-ggplot(melt(correlation_plot), aes(Var1, Var2, fill = value, label = round(value,1)))+
+ggplot(melt(correlation_plot), aes(Var1, Var2, fill = value, label = round(value,2)))+
   geom_tile()+
-  geom_text(aes(label= ifelse(value>0.5, as.character(round(value, 1)), "")))+
+  geom_text(aes(label= ifelse(value>0.1, as.character(round(value, 1)), "")))+
   scale_fill_gradient(low = "tomato",
                       high = "skyblue")+
   labs(title = "Correlation plot of variables")+
@@ -436,9 +466,71 @@ The models will be evaluated using:
 While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
 
 ```{r}
-set.seed(1599) # Set seed to ensure reproducibility
+# Set seed to ensure reproducibility
+set.seed(1599)
 
-initial_split()
+# Split the data to train and test data
+split <- initial_split(health_rec_clean, prop = 0.8)
+health_rec_train <- training(split) #train data
+health_rec_test <- testing(split) #test data
+```
+
+**Data Preview**
+```{r}
+head(health_rec_test, n = 5)
+
+head(health_rec_train, n = 5)
+```
+
+### Training Data
+#### Logistic Regression
+```{r set train and test data, message=FALSE}
+# Removing id number
+health_rec_train <- health_rec_train %>%
+  select(-1)
+
+health_rec_test <- health_rec_test %>%
+  select(-1)
+```
+
+
+```{r logistic_regression, message=FALSE}
+logistic_model <- glm(formula = outcome ~ .,
+                      family = "binomial",
+                      data = health_rec_train)
+```
+
+#### Random Forest Classifier
+```{r random_forest_model, message=FALSE}
+rf_model <- randomForest(outcome ~ .,
+             data = health_rec_train,
+             ntree = 100)
+
+dt_model <- rpart(outcome ~.,
+                  data = health_rec_train,
+                  method = "class")
+```
+
+```{r}
+predictions <- predict(rf_model, newdata = health_rec_test, type = "class")
+
+predict2 <- predict(dt_model,
+                    health_rec_test, type = "class")
+
+predict3 <- predict(logistic_model,
+                    health_rec_test, 
+                    type = "response")
+```
+
+##### Confusion Matrix
+```{r}
+predictions <- ifelse(predictions >=0.5, 1, 0)
+predict3 <- ifelse(predict3 >= 0.5,1, 0)
+
+table(predictions, health_rec_test$outcome)
+
+table(predict2, health_rec_test$outcome)
+table(predict3, health_rec_test$outcome)
 ```
 
 
