@@ -52,6 +52,7 @@ library('rsample')
 library("randomForest")
 
 library("rpart")
+library("rpart.plot")
 ```
 Next we import the data.frame
 
@@ -465,6 +466,7 @@ The models will be evaluated using:
 - Precision scores
 While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
 
+### Data Preparation
 ```{r}
 # Set seed to ensure reproducibility
 set.seed(1599)
@@ -475,15 +477,6 @@ health_rec_train <- training(split) #train data
 health_rec_test <- testing(split) #test data
 ```
 
-**Data Preview**
-```{r}
-head(health_rec_test, n = 5)
-
-head(health_rec_train, n = 5)
-```
-
-### Training Data
-#### Logistic Regression
 ```{r set train and test data, message=FALSE}
 # Removing id number
 health_rec_train <- health_rec_train %>%
@@ -493,7 +486,15 @@ health_rec_test <- health_rec_test %>%
   select(-1)
 ```
 
+**Preview**
+```{r}
+head(health_rec_test, n = 5)
 
+head(health_rec_train, n = 5)
+```
+
+### Model Training
+#### Logistic Regression
 ```{r logistic_regression, message=FALSE}
 logistic_model <- glm(formula = outcome ~ .,
                       family = "binomial",
@@ -501,14 +502,22 @@ logistic_model <- glm(formula = outcome ~ .,
 ```
 
 #### Random Forest Classifier
+We select the best parameter for ntree for the randomForest function using the caret package.
+```{r}
+library("caret")
+
+# Create parameter grid for search values
+
+param_grid <- expand_grid(ntree = c(50, 100, 500, 1000, 2000))
+
+# define control function
+```
+
+
 ```{r random_forest_model, message=FALSE}
 rf_model <- randomForest(outcome ~ .,
              data = health_rec_train,
-             ntree = 100)
-
-dt_model <- rpart(outcome ~.,
-                  data = health_rec_train,
-                  method = "class")
+             ntree = 130)
 ```
 
 ```{r}
