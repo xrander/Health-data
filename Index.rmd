@@ -51,6 +51,10 @@ library('rsample')
 # Random Forest
 library("randomForest")
 
+# For classification and regression training
+library("caret")
+
+# Recursive partitioning and regression tree plots
 library("rpart")
 library("rpart.plot")
 ```
@@ -174,36 +178,6 @@ The MIMIC-III database is publicly a available critical care database containing
 
 -   EF: Ejection Fraction: Used to gauge how healthy the heart is. It is the amount of blood that the heart pumps each time it beats.
 
-# Descriptive Stats Questions
-
-Based on the data available the following questions will be answered:
-
-1.   Which age group is the most in the hospital?
-
-2.   which age group of patients dies more in the hospital?
-
-3.   which gender is the most prevalent in the hospital?
-
-4.   which gender group is having the highest number of death?
-
-5.   how many patients died in the hospital with atrial fibrillation?
-
-6.   how many patients in the hospital have depression?
-
-7.   what is the rate of non-survived patients with hypertension?
-
-8.   Rate of gender with hypertension
-
-9.   How many patients with renal failure are alive in the hospital?
-
-10.   how many patients in the hospital with Hyperlipemia are dead?
-
-11.   how many patients in the hospital with Anemia are dead?
-
-12.   What is the proportion of survival and non-survival between diabetic and non-diabetic patients
-
-13.  What is the proportion of survival and non-survival between depressed and non-depressed patients
-
 # Data Preparation and Preprocessing
 
 > **Note:** The PostgreSQL code solution to the descriptive statistic questions asked are
@@ -242,6 +216,8 @@ health_rec <- health_rec%>%
 
 There is no missing data present in the outcome of patients. The data have been reduced from 1177 to `dim(health_rec)[1]`.
 To deal with missing values from the other variables other than outcome, we need to know the missing value for the categorical and numeric variable and take the necessary steps.
+
+#### Categorical Varaibles
 ```{r categorical_variables}
 categorical <- health_rec %>%
   select(gender, hypertensive:COPD)
@@ -250,6 +226,7 @@ unique(is.na(categorical))
 ```
 The categorical variables do not have missing values.
 
+#### Numerical Variables distribution
 For the numerical variable, the descriptive statistics carried out earlier shows that some numerical variables contains missing values
 ```{r numerical_variables}
 numerical <- health_rec %>%
@@ -257,14 +234,14 @@ numerical <- health_rec %>%
 
 str(numerical)
 ```
-We are going to impute the missing values in the numerical variables using their mean. We use the e1071 package **impute()** to impute the means here.
+We are going to impute the missing values in the numerical variables using their mean. We use the e1071 package **impute()** function to impute the means here.
 
 ```{r}
 imputed_means <- numerical %>%
   impute(what = "mean")
 ```
 
-### Numerical Variables distribution
+##### Distibution of Numerical Variables
 The new data will be tidied to visualize the distribution of the numerical variables.
 ```{r}
 as_tibble(imputed_means) %>%
@@ -276,7 +253,16 @@ as_tibble(imputed_means) %>%
   facet_wrap(~variable, scales = "free")+
   theme_bw()
 ```
+###### Normally distributed Variables
+Variables provides information on the body's electrolyte and Mineral content such as anion gap, bicarbonate, blood calcium, blood potassium, blood sodium and chloride are normally distributed. Vital signs and Cardiovascular parameters such as temperature, PH, Diastolic blood pressure, and heart rate are also normally distributed. Only three Hematology parameters, MCH, MCHC and MCV are normally distributed.
 
+###### Right-skewed Variables
+Respiratory rate, RBW, RBC, urea nitrogen, urine output, basophils, BMI, creatine-Kinase, creatinine, glucose, hematocrit, INR, lactic acid, leucocyte, lymphocyte, magnesium ion, NT Pro BMP, PCO2, platelets, PT, and systolic blood pressure are all right skewed.
+
+###### Left-skewed Variables
+Only three variables are left skewed. These includes neutrophils, EF, and SP O2.
+
+#### Imputing Missing Values
 
 Next we replace the old values with new ones in the main data frame. In the process, the group_num and ID column were also removed.
 ```{r}
@@ -445,8 +431,10 @@ ggplot(melt(correlation_plot), aes(Var1, Var2, fill = value, label = round(value
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-# Patient Outcome Prediction
-## Machine Learning Algorithms to be used
+
+
+# Outcome Prediction
+Machine Learning Algorithms to be used
 We are going to predict the outcome of any one patients making use of four machine learning algorithms viz:
 
 - Logistic Regression
@@ -457,7 +445,7 @@ We are going to predict the outcome of any one patients making use of four machi
 
 - Gradient Boosting Algorithms (XGboosts)
 
-The models will be evaluated using:
+Models will be evaluated using:
 
 - ROC curve
 
@@ -493,16 +481,23 @@ head(health_rec_test, n = 5)
 head(health_rec_train, n = 5)
 ```
 
-### Model Training
-#### Logistic Regression
+## Model Training
+### Logistic Regression
+Training the model
 ```{r logistic_regression, message=FALSE}
 logistic_model <- glm(formula = outcome ~ .,
                       family = "binomial",
                       data = health_rec_train)
+
+summary(logistic_model)
 ```
 
-#### Random Forest Classifier
-We select the best parameter for ntree for the randomForest function using the caret package.
+
+Eight variables blood calcium,  urea nitrogen, creatinine, platelets, heart rate, diastolic blood pressure, COPD, and renal failure have a significant effect on the outcome.
+
+### Random Forest Classifier
+Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
+
 ```{r}
 library("caret")
 
@@ -510,8 +505,18 @@ library("caret")
 
 param_grid <- expand_grid(ntree = c(50, 100, 500, 1000, 2000))
 
-# define control function
+# define control function for tuning
+control <- trainControl(method = "cv", number = 5) # Use 5 folds cross-validation
 ```
+
+
+## Predicting the outcome
+```{r}
+health_rec_test %>%
+  mutate(log_pred = round(predict(logistic_model, health_rec_test, type = "response"), 1),
+         log_pred = ifelse(log_pred >= 0.5, 1, 0))
+```
+
 
 
 ```{r random_forest_model, message=FALSE}
