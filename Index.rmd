@@ -499,14 +499,15 @@ Eight variables blood calcium,  urea nitrogen, creatinine, platelets, heart rate
 Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
 
 ```{r}
-library("caret")
-
 # Create parameter grid for search values
 
-param_grid <- expand_grid(ntree = c(50, 100, 500, 1000, 2000))
+param_grid <- expand.grid(mtry = c(50, 100, 200, 300, 500))
 
 # define control function for tuning
 control <- trainControl(method = "cv", number = 5) # Use 5 folds cross-validation
+
+model <- train(outcome ~ ., data = health_rec_train, method = "rf", trControl = control, tuneGrid = param_grid)
+print(model)
 ```
 
 
