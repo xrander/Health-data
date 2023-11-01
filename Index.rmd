@@ -251,7 +251,7 @@ as_tibble(imputed_means) %>%
   ggplot(show.legend = F)+
   geom_density(aes(value), col = "tomato2")+
   facet_wrap(~variable, scales = "free")+
-  theme_bw()
+  theme_minimal()
 ```
 ###### Normally distributed Variables
 Variables provides information on the body's electrolyte and Mineral content such as anion gap, bicarbonate, blood calcium, blood potassium, blood sodium and chloride are normally distributed. Vital signs and Cardiovascular parameters such as temperature, PH, Diastolic blood pressure, and heart rate are also normally distributed. Only three Hematology parameters, MCH, MCHC and MCV are normally distributed.
@@ -275,10 +275,12 @@ health_rec_clean <- health_rec %>%
 tail(health_rec_clean, 10)
 ```
 
+
 Now we check to find if there are still missing values.
 ```{r}
 unique(is.na(health_rec_clean))
 ```
+
 All numerical variable missing values are replaced by their means.
 
 # Exploratory Data Analysis
