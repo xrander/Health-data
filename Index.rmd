@@ -56,6 +56,7 @@ library("caret")
 
 # Recursive partitioning and regression tree plots
 library("rpart")
+library("reprtree")
 library("rpart.plot")
 ```
 Next we import the data.frame
@@ -287,9 +288,9 @@ All numerical variable missing values are replaced by their means.
 A majority of the question asked are descriptive statistics questions and answers will be provided using visualization and tables.
 
 ## Descriptive Statistics
-### Age Distribution According to Groups
+### What is the percentage age distribution according to age groups
 **The age group with the highest frequency**: To do this, we have to bin the age variable, creating a class range, then we can create a summary of the age_group and see their frequency
-```{r age_group_class_interval}
+```{r age-group-class-interval}
 # Create bins
 age_categories <- seq(0, 120, by = 20) # We assume the highest age is not above 120 years old
 
@@ -307,7 +308,7 @@ health_rec_clean <- health_rec_clean %>%
 ```
 
 
-```{r age_group_frequency visualization}
+```{r age-group-frequency-visualization}
 health_rec_clean %>%
   group_by(age_group) %>%
   summarize(frequency = n()) %>%
@@ -333,6 +334,7 @@ health_rec_clean %>%
 Older people are the highest in the hospital, with people between 60 - 80 years old having being the highest in the clinic and people more than 80 years old being the next most occurring patients.
 To know the age(not age group) that is most occurring, we can simply group by the age them.
 
+### Top Occuring ages in the Hospital
 ```{r message=FALSE}
 health_rec_clean %>%
   group_by(age) %>%
@@ -342,7 +344,7 @@ health_rec_clean %>%
 ```
 The highest count of patients in the clinic are aged 89, 84 and 81 years respectively.
 
-**Death Count of both genders**
+### What is the number of dead patients for each gender*
 ```{r message=FALSE}
 health_rec_clean %>%
   filter(outcome == 1) %>%
@@ -363,18 +365,23 @@ health_rec_clean %>%
 
 The chart shows the dead patients according to age group and gender. The age group 80-100 years for females have the highest count of death.
 
+### Gender Frequency
 The gender with the highest count in the clinic is the female gender as show below
-```{r frequency of gender}
+```{r frequency-of-gender}
 health_rec_clean %>%
   select(gender) %>%
   mutate(gender = ifelse(gender == 1, "Male", "Female")) %>%
   group_by(gender) %>%
-  count()
+  count() %>%
+  ggplot(aes(gender, n))+
+  geom_col(fill = c("tan3", "wheat4"))+
+  ggtitle("Frequency of Patients According to Their Gender")+
+  theme_bw()
 ```
 
-what is the death rate of both gender
+#what is the death rate of both gender for a given age group?
 
-```{r}
+```{r death-rate-for-age-group}
 health_rec_clean %>%
   mutate(outcome = ifelse(outcome == 0, "Alive", "Dead"),
          gender = ifelse(gender == 1, "Male", "Female")) %>%
@@ -387,7 +394,6 @@ health_rec_clean %>%
          death_per_100 = Dead/100,
          death_ratio = round(Dead/total, 2))
 ```
-The male gender have higher number of death.
 
 ### Disease and Death
 Now we will investigate the 159 death occurrences that is present in the clinic and relate it to some of the diseases.
@@ -414,10 +420,11 @@ dead_patients_tidy <- dead_patients %>%
 dead_patients_tidy %>%
   ggplot(aes(state, fill = gender))+
   geom_bar(position = "dodge")+
-  scale_fill_manual(values = c("tan", "olivedrab"))+
+  scale_fill_manual(values = c("wheat4", "tan3"))+
   facet_wrap(~diseases, scales = "free_y")+
   theme_bw()
 ```
+All dead patients seems to be having a disease or health condition, while Renal_failure have not been related to death.
 
 ##  Correlation Analysis
 ```{r}
@@ -500,16 +507,25 @@ Eight variables blood calcium,  urea nitrogen, creatinine, platelets, heart rate
 ### Random Forest Classifier
 Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
 
-```{r}
+#### Hypertuning parameter for Random Forest
+```{r hyperparameter-tuning, message=FALSE, warning=FALSE}
 # Create parameter grid for search values
 
-param_grid <- expand.grid(mtry = c(50, 100, 200, 300, 500))
+param_grid <- expand.grid(mtry = c(50, 500, 700, 1000, 2000))
 
 # define control function for tuning
 control <- trainControl(method = "cv", number = 5) # Use 5 folds cross-validation
 
 model <- train(outcome ~ ., data = health_rec_train, method = "rf", trControl = control, tuneGrid = param_grid)
 print(model)
+```
+
+#### Training the Random Forest Model
+The best parameter for ntree = 700 will be used for the model.
+```{r random-forest.model, message=FALSE, warning=FALSE}
+rf_model <- randomForest(outcome ~ .,
+                         data = health_rec_train,
+                         ntree = 700)
 ```
 
 
@@ -526,8 +542,13 @@ health_rec_test %>%
 rf_model <- randomForest(outcome ~ .,
              data = health_rec_train,
              ntree = 130)
+
+summary(rf_model)
 ```
 
+### SUpport Vector Machines
+
+### XGBoot
 ```{r}
 predictions <- predict(rf_model, newdata = health_rec_test, type = "class")
 
