@@ -42,7 +42,7 @@ library('tidyverse')
 # Load corrplot package for correlation matrix
 library('corrplot')
 
-# Load Hmisc to impute missing values
+# Load e1071 to impute missing values and svm model training
 library("e1071")
 
 # For data sampling for training and testing
@@ -464,6 +464,7 @@ Models will be evaluated using:
 While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
 
 ### Data Preparation
+Split the data and set seed.
 ```{r}
 # Set seed to ensure reproducibility
 set.seed(1599)
@@ -475,12 +476,12 @@ health_rec_test <- testing(split) #test data
 ```
 
 ```{r set train and test data, message=FALSE}
-# Removing id number
+# Remove id number and age_group columns
 health_rec_train <- health_rec_train %>%
-  select(-1)
+  select(-c(1, 51))
 
 health_rec_test <- health_rec_test %>%
-  select(-1)
+  select(-c(1, 51))
 ```
 
 **Preview**
@@ -511,12 +512,12 @@ Random forest classifier uses multiple decision tree models and try to mitigate 
 ```{r hyperparameter-tuning, message=FALSE, warning=FALSE}
 # Create parameter grid for search values
 
-param_grid <- expand.grid(mtry = c(50, 500, 700, 1000, 2000))
+param_grid <- expand.grid(mtry = c(50, 200, 300,500, 700))
 
 # define control function for tuning
-control <- trainControl(method = "cv", number = 5) # Use 5 folds cross-validation
+control <- trainControl(method = "cv", number = 5) # Use 20 folds cross-validation
 
-model <- train(outcome ~ ., data = health_rec_train, method = "rf", trControl = control, tuneGrid = param_grid)
+model <- train(factor(outcome) ~ ., data = health_rec_train, method = "rf", trControl = control, tuneGrid = param_grid)
 print(model)
 ```
 
@@ -526,14 +527,15 @@ The best parameter for ntree = 700 will be used for the model.
 rf_model <- randomForest(outcome ~ .,
                          data = health_rec_train,
                          ntree = 700)
+summary(rf_model)
 ```
 
 
 ## Predicting the outcome
 ```{r}
-health_rec_test %>%
-  mutate(log_pred = round(predict(logistic_model, health_rec_test, type = "response"), 1),
-         log_pred = ifelse(log_pred >= 0.5, 1, 0))
+pred <- ifelse(predict(rf_model, health_rec_test) <= 0.5, 0, 0)
+
+table(actual = health_rec_test$outcome, predicted = pred)
 ```
 
 
@@ -546,7 +548,11 @@ rf_model <- randomForest(outcome ~ .,
 summary(rf_model)
 ```
 
-### SUpport Vector Machines
+### Support Vector Machines
+```{r}
+svm_model <- svm(outcome ~ .,
+                 data = health_rec_train)
+```
 
 ### XGBoot
 ```{r}
