@@ -484,16 +484,16 @@ health_rec_test <- health_rec_test %>%
   select(-c(1, 51))
 ```
 
-**Preview**
+**Preview split data**
 ```{r}
 head(health_rec_test, n = 5)
 
 head(health_rec_train, n = 5)
 ```
 
-## Model Training
+## Model Training and Evaluation
 ### Logistic Regression
-Training the model
+**Training the model**
 ```{r logistic_regression, message=FALSE}
 logistic_model <- glm(formula = outcome ~ .,
                       family = "binomial",
@@ -502,8 +502,21 @@ logistic_model <- glm(formula = outcome ~ .,
 summary(logistic_model)
 ```
 
+Ten variables blood calcium,  urea nitrogen, creatinine, platelets, leucocytes, PCO2, heart rate, diastolic blood pressure, COPD, and renal failure have a significant effect on the outcome.
 
-Eight variables blood calcium,  urea nitrogen, creatinine, platelets, heart rate, diastolic blood pressure, COPD, and renal failure have a significant effect on the outcome.
+**Making Predictions**
+```{r}
+health_rec_test <- health_rec_test %>%
+  mutate(log_pred = ifelse(predict(logistic_model, health_rec_test) >= 0.5, 1, 0))
+```
+
+```{r}
+mean(health_rec_test$outcome == health_rec_test$log_pred)
+```
+The logistic model is having a 87.3% accuracy. Next we will see a confusion matric to see how well it performs
+```{r}
+table(log_predicted = health_rec_test$log_pred, actual = health_rec_test$outcome)
+```
 
 ### Random Forest Classifier
 Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
@@ -515,7 +528,7 @@ Random forest classifier uses multiple decision tree models and try to mitigate 
 param_grid <- expand.grid(mtry = c(50, 200, 300,500, 700))
 
 # define control function for tuning
-control <- trainControl(method = "cv", number = 5) # Use 20 folds cross-validation
+control <- trainControl(method = "cv", number = 5) # Use 5 folds cross-validation
 
 model <- train(factor(outcome) ~ ., data = health_rec_train, method = "rf", trControl = control, tuneGrid = param_grid)
 print(model)
