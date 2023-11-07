@@ -31,30 +31,10 @@ and
 We load the libraries for reading and analyzing the data first.
 
 ```{r load_libraries, message=FALSE, results='hide'}
-# Load the doBy library for advanced data manipulation and data aggregation
-library('doBy')
-
 library("reshape2")
 
 # Load the tidyverse library for data manipulation and visualization
 library('tidyverse')
-
-# Load corrplot package for correlation matrix
-library('corrplot')
-
-# Load e1071 to impute missing values and svm model training
-library("e1071")
-
-# Random Forest
-library("randomForest")
-
-# For classification and regression training
-library("caret")
-
-# Recursive partitioning and regression tree plots
-library("rpart")
-library("reprtree")
-library("rpart.plot")
 ```
 Next we import the data.frame
 
@@ -234,14 +214,19 @@ str(numerical)
 ```
 We are going to impute the missing values in the numerical variables using their mean. We use the e1071 package **impute()** function to impute the means here.
 
-```{r}
+```{r load-library-for-imputation}
+# Load e1071 to impute missing values, and svm model training
+library("e1071")
+```
+
+```{r impute-means}
 imputed_means <- numerical %>%
   impute(what = "mean")
 ```
 
 ##### Distibution of Numerical Variables
 The new data will be tidied to visualize the distribution of the numerical variables.
-```{r}
+```{r visualize-numerical-variables}
 as_tibble(imputed_means) %>%
   pivot_longer(cols = everything(),
                names_to = "variable",
@@ -395,14 +380,14 @@ health_rec_clean %>%
 ### Disease and Death
 Now we will investigate the 159 death occurrences that is present in the clinic and relate it to some of the diseases.
 
-```{r}
+```{r dead-patients}
 dead_patients <- health_rec_clean %>%
   filter(outcome == 1) %>%
   select(outcome:COPD)
 ```
 
 **Tidying the data for visualization**
-```{r}
+```{r tidy-dead-patients-data}
 dead_patients_tidy <- dead_patients %>%
   pivot_longer(cols = c(hypertensive:COPD),
                names_to = "diseases",
@@ -413,7 +398,7 @@ dead_patients_tidy <- dead_patients %>%
          state = ifelse(diseases != "Renal_failure", "Having", "Not Having"))
 ```
 
-```{r}
+```{r bisualize-dead-patient}
 dead_patients_tidy %>%
   ggplot(aes(state, fill = gender))+
   geom_bar(position = "dodge")+
@@ -424,9 +409,14 @@ dead_patients_tidy %>%
 All dead patients seems to be having a disease or health condition, while Renal_failure have not been related to death.
 
 ##  Correlation Analysis
-```{r}
+```{r correlation-plot-numerical-variables}
+# Load corrplot package for correlation matrix
+library('corrplot')
+
+# Correlation for numerical variables
 correlation_plot <- cor(health_rec_clean[,c(1:2, 13:49)])
 
+# Visualize correlation
 ggplot(melt(correlation_plot), aes(Var1, Var2, fill = value, label = round(value,2)))+
   geom_tile()+
   geom_text(aes(label= ifelse(value>0.1, as.character(round(value, 1)), "")))+
@@ -462,7 +452,9 @@ While these are used, Regression related metrics such as MAE, MSE, RMSE and R-sq
 
 ## Data Splitting
 Split the data and set seed.
-```{r}
+```{r split-data}
+# Load caret package for data spliting
+library("caret")
 # Set seed to ensure reproducibility
 set.seed(1599)
 
@@ -477,7 +469,7 @@ health_rec_train <- health_rec_clean[training_data_index, ]
 health_rec_test <- health_rec_clean[-training_data_index,]
 ```
 
-```{r set train and test data, message=FALSE}
+```{r set-train-and-test-data, message=FALSE}
 # Remove id number and age_group columns
 health_rec_train <- health_rec_train %>%
   select(-c(1, 51))
@@ -487,7 +479,7 @@ health_rec_test <- health_rec_test %>%
 ```
 
 **Preview split data**
-```{r}
+```{r preview-data}
 head(health_rec_test, n = 5)
 
 head(health_rec_train, n = 5)
@@ -497,7 +489,7 @@ head(health_rec_train, n = 5)
 
 ### Logistic Regression
 ####Training the model
-```{r logistic_regression, message=FALSE}
+```{r logistic-regression, message=FALSE}
 logistic_model <- glm(formula = outcome ~ .,
                       family = "binomial",
                       data = health_rec_train)
@@ -506,17 +498,22 @@ logistic_model <- glm(formula = outcome ~ .,
 Ten variables blood calcium,  urea nitrogen, creatinine, platelets, leucocytes, PCO2, heart rate, diastolic blood pressure, COPD, and renal failure have a significant effect on the outcome.
 
 #### Making Predictions
-```{r}
+```{r logistic-regression-prediction}
 logistic_pred <- ifelse(predict(logistic_model, health_rec_test) >= 0.5, 1, 0)
 ```
 
-```{r}
+```{r logistic-prediction-accuracy-probability}
 mean(health_rec_test$outcome == logistic_pred)
 ```
 The logistic model is having a 88.1% accuracy.
 
 ### Random Forest Classifier
 Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
+```{r}
+# load randomForest library
+library("randomForest")
+```
+
 #### Hypertuning parameter for Random Forest
 ```{r hyperparameter-tuning, message=FALSE, warning=FALSE}
 # Create parameter grid for search values
@@ -532,27 +529,31 @@ print(model)
 
 #### Training the Random Forest Model
 The best parameter for ntree = 300 will be used for the model.
-```{r random-forest.model, message=FALSE, warning=FALSE}
+```{r random-forest-model, message=FALSE, warning=FALSE}
 rf_model <- randomForest(outcome ~ .,
                          data = health_rec_train,
-                         ntree = 300)
+                         ntree = 300) # train rf model with best parameter from hypertuning
 ```
 
 
 #### Predicting the outcome
-```{r}
+```{r rf-model-prediction}
 rf_pred <- ifelse(predict(rf_model, health_rec_test, type = "response") >= 0.5, 1, 0)
 ```
 
-```{r}
+```{r rf-model-accuracy-measure}
 mean(health_rec_test$outcome == rf_pred)
 ```
 
 The model is having 87.6% accuracy a bit lower than the logistic regression model.
 
 ### Support Vector Machines (SVM)
-```{r}
+```{r svm-model}
+# mutate outcome to factor type
 health_rec_train2 <- health_rec_train %>%
+  mutate(outcome = factor(outcome))
+
+health_rec_test2 <- health_rec_test %>%
   mutate(outcome = factor(outcome))
 svm_model <- svm(outcome ~ .,
                  data = health_rec_train2,
@@ -561,16 +562,15 @@ svm_model <- svm(outcome ~ .,
 summary(svm_model)
 ```
 #### Predicting with the outcome with SVM
-```{r}
+```{r svm-prediction}
 svm_pred <- predict(svm_model, health_rec_test2)
 ```
 
 
-```{r}
+```{r svm-accuracy-measure}
 mean(health_rec_test2$outcome == svm_pred)
 ```
 The model is having 88.1% accuracy, similar to logistic regression
-
 
 ### XGBoost
 Next we will use the xgboost package
@@ -581,7 +581,7 @@ library(xgboost)
 
 #### XGBoost data Preparation
 We create the xgboost data type
-```{r}
+```{r create-xgboost-dmatrix}
 # Create XGBosst data structure for test and train data
 dtrain <- xgb.DMatrix(data = as.matrix(health_rec_train[, -1]), label = as.matrix(health_rec_train[, 1]))
 dtest <- xgb.DMatrix(data = as.matrix(health_rec_test[, -1]))
@@ -589,7 +589,7 @@ dtest <- xgb.DMatrix(data = as.matrix(health_rec_test[, -1]))
 
 #### Training the Data
 Next we train the data
-```{r results='hide'}
+```{r train-data-xgboost, results='hide'}
 # Set parameter structure
 params <- list(
   objective = "binary:logistic",
@@ -605,11 +605,11 @@ xgb_model <- xgboost(params = params,
 
 #### Predicting with the Model
 Now we can make predictions
-```{r}
+```{r xgboost-prediction}
 xgboost_pred <- ifelse(predict(xgb_model, dtest, type = "class") >=0.5, 1, 0)
 ```
 
-```{r}
+```{r xgboost-accuracy}
 mean(xgboost_pred == health_rec_test$outcome)
 ```
 The model is having a 90% accuracy which is the best performance so far.
@@ -617,26 +617,26 @@ The model is having a 90% accuracy which is the best performance so far.
 ## Model Evaluation
 The confusion matrix is used as the only evaluation method for this study.
 ### Logistic Regression
-```{r}
+```{r confusion-matrix-logistic}
 table(log_predicted = logistic_pred, actual = health_rec_test$outcome)
 ```
 
 The model performs poorly at predicting dead individuals. It is having more false positives, predicting that some patients are alive instead dead.
 
 ### Random Forests Classifier
-```{r}
+```{r confusion-matrix-rf}
 table(random_forest_predicted = rf_pred, actual = health_rec_test$outcome)
 ```
 
 This performance is also similar to logistic model, it is also having more false positives, predicting that some individuals are dead instead of alive.
 
 ### SVM
-```{r}
+```{r confusion-matrix-svm}
 table(prediction = svm_pred, actual = health_rec_test2$outcome)
 ```
 
 ### XGBoosts
-```{r}
+```{r confusion-matrix-xgboost}
 table(xgboost_pred, health_rec_test$outcome)
 ```
 Predictions by XGBoost is the best so far, it performs better in predicting actual death than other models
