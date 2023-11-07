@@ -1,5 +1,5 @@
 ---
-title: "Predicting Health Outcome"
+title: "Predicting Health Outcome (Classification Model)"
 author: "Olamide Adu"
 date: "2023-03-25"
 output:
@@ -44,9 +44,6 @@ library('corrplot')
 
 # Load e1071 to impute missing values and svm model training
 library("e1071")
-
-# For data sampling for training and testing
-library('rsample')
 
 # Random Forest
 library("randomForest")
@@ -463,16 +460,21 @@ Models will be evaluated using:
 - Precision scores
 While these are used, Regression related metrics such as MAE, MSE, RMSE and R-squared will also be used based on the algorithm.
 
-### Data Preparation
+## Data Splitting
 Split the data and set seed.
 ```{r}
 # Set seed to ensure reproducibility
 set.seed(1599)
 
 # Split the data to train and test data
-split <- initial_split(health_rec_clean, prop = 0.8)
-health_rec_train <- training(split) #train data
-health_rec_test <- testing(split) #test data
+training_data_index <- createDataPartition(health_rec_clean$outcome,
+                    p = 0.8,
+                    list = F)
+
+# Training data
+health_rec_train <- health_rec_clean[training_data_index, ]
+# Test data
+health_rec_test <- health_rec_clean[-training_data_index,]
 ```
 
 ```{r set train and test data, message=FALSE}
@@ -491,36 +493,30 @@ head(health_rec_test, n = 5)
 head(health_rec_train, n = 5)
 ```
 
-## Model Training and Evaluation
+## Model Building and Tuning
+
 ### Logistic Regression
-**Training the model**
+####Training the model
 ```{r logistic_regression, message=FALSE}
 logistic_model <- glm(formula = outcome ~ .,
                       family = "binomial",
                       data = health_rec_train)
-
-summary(logistic_model)
 ```
 
 Ten variables blood calcium,  urea nitrogen, creatinine, platelets, leucocytes, PCO2, heart rate, diastolic blood pressure, COPD, and renal failure have a significant effect on the outcome.
 
-**Making Predictions**
+#### Making Predictions
 ```{r}
-health_rec_test <- health_rec_test %>%
-  mutate(log_pred = ifelse(predict(logistic_model, health_rec_test) >= 0.5, 1, 0))
+logistic_pred <- ifelse(predict(logistic_model, health_rec_test) >= 0.5, 1, 0)
 ```
 
 ```{r}
-mean(health_rec_test$outcome == health_rec_test$log_pred)
+mean(health_rec_test$outcome == logistic_pred)
 ```
-The logistic model is having a 87.3% accuracy. Next we will see a confusion matric to see how well it performs
-```{r}
-table(log_predicted = health_rec_test$log_pred, actual = health_rec_test$outcome)
-```
+The logistic model is having a 88.1% accuracy.
 
 ### Random Forest Classifier
 Random forest classifier uses multiple decision tree models and try to mitigate the overfitting from a single decision tree by aggregating the decision from multiple decision trees.
-
 #### Hypertuning parameter for Random Forest
 ```{r hyperparameter-tuning, message=FALSE, warning=FALSE}
 # Create parameter grid for search values
@@ -535,62 +531,117 @@ print(model)
 ```
 
 #### Training the Random Forest Model
-The best parameter for ntree = 700 will be used for the model.
+The best parameter for ntree = 300 will be used for the model.
 ```{r random-forest.model, message=FALSE, warning=FALSE}
 rf_model <- randomForest(outcome ~ .,
                          data = health_rec_train,
-                         ntree = 700)
-summary(rf_model)
+                         ntree = 300)
 ```
 
 
-## Predicting the outcome
+#### Predicting the outcome
 ```{r}
-pred <- ifelse(predict(rf_model, health_rec_test) <= 0.5, 0, 0)
-
-table(actual = health_rec_test$outcome, predicted = pred)
+rf_pred <- ifelse(predict(rf_model, health_rec_test, type = "response") >= 0.5, 1, 0)
 ```
 
-
-
-```{r random_forest_model, message=FALSE}
-rf_model <- randomForest(outcome ~ .,
-             data = health_rec_train,
-             ntree = 130)
-
-summary(rf_model)
-```
-
-### Support Vector Machines
 ```{r}
+mean(health_rec_test$outcome == rf_pred)
+```
+
+The model is having 87.6% accuracy a bit lower than the logistic regression model.
+
+### Support Vector Machines (SVM)
+```{r}
+health_rec_train2 <- health_rec_train %>%
+  mutate(outcome = factor(outcome))
 svm_model <- svm(outcome ~ .,
-                 data = health_rec_train)
-```
+                 data = health_rec_train2,
+                 kernel = "linear")
 
-### XGBoot
+summary(svm_model)
+```
+#### Predicting with the outcome with SVM
 ```{r}
-predictions <- predict(rf_model, newdata = health_rec_test, type = "class")
-
-predict2 <- predict(dt_model,
-                    health_rec_test, type = "class")
-
-predict3 <- predict(logistic_model,
-                    health_rec_test, 
-                    type = "response")
+svm_pred <- predict(svm_model, health_rec_test2)
 ```
 
-##### Confusion Matrix
+
 ```{r}
-predictions <- ifelse(predictions >=0.5, 1, 0)
-predict3 <- ifelse(predict3 >= 0.5,1, 0)
+mean(health_rec_test2$outcome == svm_pred)
+```
+The model is having 88.1% accuracy, similar to logistic regression
 
-table(predictions, health_rec_test$outcome)
 
-table(predict2, health_rec_test$outcome)
-table(predict3, health_rec_test$outcome)
+### XGBoost
+Next we will use the xgboost package
+```{r load-xgboost-library, message=FALSE}
+#load the xgboost library
+library(xgboost)
 ```
 
+#### XGBoost data Preparation
+We create the xgboost data type
+```{r}
+# Create XGBosst data structure for test and train data
+dtrain <- xgb.DMatrix(data = as.matrix(health_rec_train[, -1]), label = as.matrix(health_rec_train[, 1]))
+dtest <- xgb.DMatrix(data = as.matrix(health_rec_test[, -1]))
+```
 
+#### Training the Data
+Next we train the data
+```{r results='hide'}
+# Set parameter structure
+params <- list(
+  objective = "binary:logistic",
+  max_depth = 10,
+  eval_metric = "logloss"
+)
+# Train the XGBoost model
+xgb_model <- xgboost(params = params,
+                     data = dtrain,
+                     nthread = 2,
+                     nrounds = 200)
+```
 
+#### Predicting with the Model
+Now we can make predictions
+```{r}
+xgboost_pred <- ifelse(predict(xgb_model, dtest, type = "class") >=0.5, 1, 0)
+```
+
+```{r}
+mean(xgboost_pred == health_rec_test$outcome)
+```
+The model is having a 90% accuracy which is the best performance so far.
+
+## Model Evaluation
+The confusion matrix is used as the only evaluation method for this study.
+### Logistic Regression
+```{r}
+table(log_predicted = logistic_pred, actual = health_rec_test$outcome)
+```
+
+The model performs poorly at predicting dead individuals. It is having more false positives, predicting that some patients are alive instead dead.
+
+### Random Forests Classifier
+```{r}
+table(random_forest_predicted = rf_pred, actual = health_rec_test$outcome)
+```
+
+This performance is also similar to logistic model, it is also having more false positives, predicting that some individuals are dead instead of alive.
+
+### SVM
+```{r}
+table(prediction = svm_pred, actual = health_rec_test2$outcome)
+```
+
+### XGBoosts
+```{r}
+table(xgboost_pred, health_rec_test$outcome)
+```
+Predictions by XGBoost is the best so far, it performs better in predicting actual death than other models
+
+# Conclusion
+Four models, XGBoost, logistic regression, SVM and random forest,  were tested to see which is having the best outcome. XGBoost is having the best prediction with 90% probability of success.
 
 [Back to Homepage](https://olamideadu.com)
